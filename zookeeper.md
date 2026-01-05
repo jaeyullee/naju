@@ -45,6 +45,60 @@ $ exportfs -r
 $ showmount -e
 ```
 ```
+$ vi pv-zookeeper-1
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-zookeeper-1
+spec:
+  capacity:
+    storage: 8Gi
+  nfs:
+    server: 192.168.10.40
+    path: /nfs/zookeeper/pv1
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  volumeMode: Filesystem
+
+$ vi pv-zookeeper-2
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-zookeeper-2
+spec:
+  capacity:
+    storage: 8Gi
+  nfs:
+    server: 192.168.10.40
+    path: /nfs/zookeeper/pv2
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  volumeMode: Filesystem
+
+$ vi pv-zookeeper-3
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-zookeeper-3
+spec:
+  capacity:
+    storage: 8Gi
+  nfs:
+    server: 192.168.10.40
+    path: /nfs/zookeeper/pv3
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  volumeMode: Filesystem
+```
+
+## 5. ITMS, IDMS 생성
+```
 $ vi idms-zookeeper.yaml
 apiVersion: config.openshift.io/v1
 kind: ImageDigestMirrorSet
@@ -70,8 +124,6 @@ spec:
 $ oc apply -f idms-zookeeper.yaml
 $ oc apply -f itms-zookeeper.yaml
 ```
-
-
 
 ## 6. helm 차트로 배포
 ```
