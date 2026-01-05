@@ -95,6 +95,10 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
   volumeMode: Filesystem
+
+$ oc apply -f pv-zookeeper-1
+$ oc apply -f pv-zookeeper-2
+$ oc apply -f pv-zookeeper-3
 ```
 
 ## 5. ITMS, IDMS 생성
