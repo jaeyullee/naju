@@ -1,7 +1,7 @@
 ## 1. private helm repo 생성
 ```
 $ podman run -d --name chartmuseum --rm -it -p 8089:8080 -v /opt/helm-repo:/charts -e DEBUG=true -e STORAGE=local -e STORAGE_LOCAL_ROOTDIR=/charts chartmuseum/chartmuseum:latest
-$ helm repo add my-private-repo http://<chart-museum-server-ip>:8080
+$ helm repo add my-private-repo http://192.168.10.40:8089
 $ helm repo update
 ```
 
@@ -13,7 +13,7 @@ global:
   security:
     allowInsecureImages: true  ## 수정
 image:
-  registry: docker.io          ## idms/itms를 쓰려는경우 registry/repository를 나눠서 설정하는 것을 권
+  registry: docker.io          ## idms/itms를 쓰려는경우 registry/repository를 나눠서 설정하는 것을 권장
   repository: bitnamilegacy/zookeeper
   tag: 3.9.3-debian-12-r22
   pullPolicy: IfNotPresent
@@ -28,7 +28,7 @@ $ helm package zookeeper
 
 ## 3. ChartMuseum으로 업로드
 ```
-$ curl --data-binary "@zookeeper-13.8.7.tgz" http://<chart-museum-server-ip>:8080/api/charts
+$ curl --data-binary "@zookeeper-13.8.7.tgz" http://192.168.10.40:8089/api/charts
 $ helm repo update
 $ helm search repo my-private-repo/zookeeper
 ```
@@ -54,7 +54,7 @@ spec:
   imageDigestMirrors:
     - source: docker.io/bitnamilegacy/zookeeper
       mirrors:
-        - bastion.ocp419.test:5001/zookeeper/zookeeper
+        - bastion-nexus.kscada.kdneri.com:5002/zookeeper/zookeeper
 
 $ vi itms-zookeeper.yaml
 apiVersion: config.openshift.io/v1
@@ -65,7 +65,7 @@ spec:
   imageTagMirrors:
     - source: docker.io/bitnamilegacy/zookeeper
       mirrors:
-        - bastion.ocp419.test:5001/zookeeper/zookeeper
+        - bastion-nexus.kscada.kdneri.com:5002/zookeeper/zookeeper
 
 $ oc apply -f idms-zookeeper.yaml
 $ oc apply -f itms-zookeeper.yaml
