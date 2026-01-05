@@ -1,6 +1,6 @@
 ## 1. private helm repo 생성
 ```
-$ podman run -d --name chartmuseum --rm -it -p 8089:8080 -v /opt/helm-repo:/charts -e DEBUG=true -e STORAGE=local -e STORAGE_LOCAL_ROOTDIR=/charts chartmuseum/chartmuseum:latest
+$ podman run -d --name chartmuseum --rm -it -p 8089:8080 -v /opt/helm-repo:/charts:Z -e DEBUG=true -e STORAGE=local -e STORAGE_LOCAL_ROOTDIR=/charts chartmuseum/chartmuseum:latest
 $ helm repo add my-private-repo http://192.168.10.40:8089
 $ helm repo update
 ```
