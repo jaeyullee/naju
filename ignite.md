@@ -28,6 +28,9 @@ livenessProbe:
   periodSeconds: 10
   failureThreshold: 3
 
+# -- GridGain [modules](https://www.gridgain.com/docs/latest/developers-guide/setup#enabling-modules) to be enabled
+optionLibs: ignite-kubernetes,ignite-rest-http,ignite-log4j2,ignite-schedule    ## control-center-agent 제거
+
 # -- Number of GridGain cluster replicas
 replicaCount: 3                ## 1 -> 3으로 수정
 
