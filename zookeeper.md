@@ -14,8 +14,8 @@ global:
     allowInsecureImages: true  ## 수정
 image:
   registry: docker.io          ## idms/itms를 쓰려는경우 registry/repository를 나눠서 설정하는 것을 권장
-  repository: bitnamilegacy/zookeeper
-  tag: 3.9.3-debian-12-r22
+  repository: bitnamilegacy/zookeeper    ## 수정
+  tag: 3.9.3-debian-12-r22               ## 수정
   pullPolicy: IfNotPresent
 replicaCount: 3                ## 수정
 ...
