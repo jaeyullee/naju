@@ -1,37 +1,40 @@
-> 아래 내용은 Gemini가 가이드 해준 설치 방법입니다. 아직 테스트를 수행하지 않았습니다.
-
-## 1. DeliveryHero 레포 추가
+## 1. GridGrain 레포 추가
 ```
-$ helm repo add deliveryhero https://charts.deliveryhero.io/
+$ helm repo add gridgain https://gridgain.github.io/helm-charts/
 $ helm repo update
 ```
 
 ## 2. 차트 다운로드 및 압축 해제 (최신 버전 기준)
 > --untar 옵션을 쓰면 압축이 풀린 디렉토리 상태로 다운로드됩니다.
 ```
-$ helm pull deliveryhero/ignite-kube --untar
+$ helm pull gridgain/gridgain --untar
 ```
 
 ## 3. values.yaml 수정 후 차트 패키징
 ```
 $ vi ignite-kube/values.yaml
 image:
-  # 아래 내용은 미러레지스트리 및 idms/itms 사용하는 방식으로 수정 필요
-  # 예: registry.example.com/my-project/ignite
-  repository: <내부-컨테이너-레지스트리-주소>/ignite
-  tag: 2.16.0
+  registry: docker.io
+  repository: apache/ignite    ## 수정. 기존 이미지 쓰면 라이선스 문제 있음
+  tag: 2.17.0                  ## 수정. 3.x버전은 헬름차트 호환x
   pullPolicy: IfNotPresent
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /ignite?cmd=version
+    port: 8080
+    initialDelaySeconds: 30     ## 5초 -> 30초 이상으로 변경
+  periodSeconds: 10
+  failureThreshold: 3
+
+# -- Number of GridGain cluster replicas
+replicaCount: 3                ## 1 -> 3으로 수정
 
 # (선택) 서비스 어카운트 이름 고정 (나중에 권한 줄 때 편함)
 serviceAccount:
   create: true
   name: "my-ignite-sa"
-
-# 스토리지 클래스 지정 (OCP 환경에 맞게 필수 수정)
-persistence:
-  enabled: true
-  size: 10Gi
-  storageClass: "gp3-csi"  # 이부분은 수동 프로비저닝 방식으로 수정 필요
 
 # ... 나머지 설정 유지 혹은 수정
 
