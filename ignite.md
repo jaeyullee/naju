@@ -96,6 +96,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
+  claimRef:
+    namespace: ignite-cluster
+    name: persistence-my-ignite-0
   volumeMode: Filesystem
 
 $ vi pv-ignite-2
@@ -113,6 +116,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
+  claimRef:
+    namespace: ignite-cluster
+    name: persistence-my-ignite-1
   volumeMode: Filesystem
 
 $ vi pv-ignite-3
@@ -130,6 +136,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ""
+  claimRef:
+    namespace: ignite-cluster
+    name: persistence-my-ignite-2
   volumeMode: Filesystem
 
 $ oc apply -f pv-ignite-1
