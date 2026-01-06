@@ -195,3 +195,8 @@ $ oc adm policy add-scc-to-user anyuid -z my-ignite-sa -n ignite-cluster
 $ helm install my-ignite my-privage-repo/gridgain -n ignite-cluster
 $ oc get pods -n ignite-cluster
 ```
+> 혹시 ssc 문제가 발생한다면 아래 명령어 수행
+```
+$ oc set serviceaccount statefulset/my-ignite my-ignite-sa -n ignite-cluster
+$ oc get pods -n ignite-cluster
+```
