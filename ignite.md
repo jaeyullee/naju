@@ -102,7 +102,6 @@ $ helm package gridgain/
 > 결과: ignite-x.x.x.tgz 파일 생성됨
 
 ## 4. ChartMuseum으로 업로드 (curl 사용)
-> <chart-museum-server-ip> 부분을 실제 IP로 변경하세요.
 ```
 $ curl --data-binary "@ignite-1.0.4.tgz" http://192.168.10.40:8089/api/charts
 $ helm repo update
