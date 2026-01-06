@@ -233,4 +233,4 @@ Enter username for jdbc:ignite:thin://127.0.0.1/:
 Enter password for jdbc:ignite:thin://127.0.0.1/:
 0: jdbc:ignite:thin://127.0.0.1/> SELECT * FROM TEST_DATA;
 ```
-> 테이블 조회되면 정상상
+> 테이블 조회되면 정상
