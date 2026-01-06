@@ -51,9 +51,8 @@ optionLibs: ignite-kubernetes,ignite-rest-http,ignite-log4j2,ignite-schedule    
 # -- Number of GridGain cluster replicas
 replicaCount: 3                ## 1 -> 3으로 수정
 
-# (선택) 서비스 어카운트 이름 고정 (나중에 권한 줄 때 편함)
 serviceAccount:
-  create: true
+  create: false
   name: "my-ignite-sa"
 
 # ... 나머지 설정 유지 혹은 수정
