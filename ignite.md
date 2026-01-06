@@ -77,6 +77,11 @@ configMaps:                    ## {}에서 아래 내용으로 수정
           </bean>
       </beans>
 
+# configMapsFromFile:    ## 이 단락 전체 주석처리
+#   default-config:
+#     filename: default-config.xml
+#     path: /opt/gridgain/config/default-config.xml
+
 livenessProbe:
   enabled: true
   httpGet:
