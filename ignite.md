@@ -32,7 +32,7 @@ version: 1.0.4
 $ vi gridgain/values.yaml
 image:
   registry: docker.io
-  repository: apache/ignite    ## 수정. 기존 이미지 쓰면 라이선스 문제 있음
+  repository: apacheignite/ignite    ## 수정. 기존 이미지 쓰면 라이선스 문제 있음
   tag: 2.17.0                  ## 수정. 3.x버전은 헬름차트 호환x
   pullPolicy: IfNotPresent
 
