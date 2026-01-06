@@ -36,6 +36,47 @@ image:
   tag: 2.17.0                  ## 수정. 3.x버전은 헬름차트 호환x
   pullPolicy: IfNotPresent
 
+# -- GridGain [modules](https://www.gridgain.com/docs/latest/developers-guide/setup#enabling-modules) to be enabled
+optionLibs: ignite-kubernetes,ignite-rest-http,ignite-log4j2,ignite-schedule,ignite-json    ## control-center-agent 제거, ignite-json 추가
+
+# -- Number of GridGain cluster replicas
+replicaCount: 3                ## 1 -> 3으로 수정
+
+configMaps:                    ## {}에서 아래 내용으로 수정
+  default-config:
+    name: default-config.xml
+    path: /opt/ignite/apache-ignite/config/default-config.xml
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <beans xmlns="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+                                 http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+          <bean class="org.apache.ignite.configuration.IgniteConfiguration">
+              <property name="discoverySpi">
+                  <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+                      <property name="ipFinder">
+                          <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder">
+                              <property name="namespace" value="{{ .Release.Namespace }}"/>
+                              <property name="serviceName" value="{{ include "gridgain.fullname" . }}-headless"/>
+                          </bean>
+                      </property>
+                  </bean>
+              </property>
+
+              <property name="dataStorageConfiguration">
+                  <bean class="org.apache.ignite.configuration.DataStorageConfiguration">
+                      <property name="defaultDataRegionConfiguration">
+                          <bean class="org.apache.ignite.configuration.DataRegionConfiguration">
+                              <property name="persistenceEnabled" value="true"/>
+                          </bean>
+                      </property>
+                      </bean>
+              </property>
+          </bean>
+      </beans>
+
 livenessProbe:
   enabled: true
   httpGet:
@@ -44,12 +85,6 @@ livenessProbe:
     initialDelaySeconds: 30     ## 5초 -> 30초 이상으로 변경
   periodSeconds: 10
   failureThreshold: 3
-
-# -- GridGain [modules](https://www.gridgain.com/docs/latest/developers-guide/setup#enabling-modules) to be enabled
-optionLibs: ignite-kubernetes,ignite-rest-http,ignite-log4j2,ignite-schedule,ignite-json    ## control-center-agent 제거, ignite-json 추가
-
-# -- Number of GridGain cluster replicas
-replicaCount: 3                ## 1 -> 3으로 수정
 
 serviceAccount:
   create: false
