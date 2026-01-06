@@ -140,7 +140,8 @@ $ oc apply -f pv-ignite-3
 ## 6. 배포
 ```
 $ oc new-project ignite-cluster
-$ oc adm policy add-scc-to-user anyuid -z default -n ignite-cluster
+$ oc create sa my-ignite-sa -n ignite-cluster
+$ oc adm policy add-scc-to-user anyuid -z my-ignite-sa -n ignite-cluster
 
 $ helm install my-ignite my-privage-repo/gridgain -n ignite-cluster
 $ oc get pods -n ignite-cluster
