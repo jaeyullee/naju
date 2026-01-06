@@ -200,3 +200,37 @@ $ oc get pods -n ignite-cluster
 $ oc set serviceaccount statefulset/my-ignite my-ignite-sa -n ignite-cluster
 $ oc get pods -n ignite-cluster
 ```
+
+## 7. 클러스터 상태 점검
+```
+$ oc logs my-ignite-0 -n ignite-cluster | grep "Topology snapshot"
+```
+> ... Topology snapshot [ver=3, locNode=..., servers=3, clients=0, state=ACTIVE, ...]        ## servers=3 이면 정상
+
+```
+$ oc exec -it my-ignite-0 -n ignite-cluster -- /opt/ignite/apache-ignite/bin/control.sh --baseline
+```
+> Cluster state: INACTIVE        ## INACTIVE 라면 수동으로 ACTIVATE를 해줘야함
+> Current topology version: 3
+```
+$ oc exec -it my-ignite-0 -n ignite-cluster -- /opt/ignite/apache-ignite/bin/control.sh --activate
+```
+> Cluster state: ACTIVE          ## ACTIVE 됐으면 정상
+
+```
+$ oc exec -it my-ignite-0 -n ignite-cluster -- /opt/ignite/apache-ignite/bin/sqlline.sh -u jdbc:ignite:thin://127.0.0.1/
+Enter username for jdbc:ignite:thin://127.0.0.1/:
+Enter password for jdbc:ignite:thin://127.0.0.1/:
+0: jdbc:ignite:thin://127.0.0.1/> CREATE TABLE TEST_DATA (ID INT PRIMARY KEY, NAME VARCHAR);
+0: jdbc:ignite:thin://127.0.0.1/> INSERT INTO TEST_DATA (ID, NAME) VALUES (1, 'Ignite Works!');
+0: jdbc:ignite:thin://127.0.0.1/> INSERT INTO TEST_DATA (ID, NAME) VALUES (2, 'Cluster Check');
+0: jdbc:ignite:thin://127.0.0.1/> !quit
+```
+> 파드가 보안상 루트(Root) 권한이 없어서 파일 쓰기를 거절당해서 java 에러가 발생하지만 sql 자체는 정상수행 됩니다.
+```
+$ oc exec -it my-ignite-2 -n ignite-cluster -- /opt/ignite/apache-ignite/bin/sqlline.sh -u jdbc:ignite:thin://127.0.0.1/
+Enter username for jdbc:ignite:thin://127.0.0.1/:
+Enter password for jdbc:ignite:thin://127.0.0.1/:
+0: jdbc:ignite:thin://127.0.0.1/> SELECT * FROM TEST_DATA;
+```
+> 테이블 조회되면 정상상
