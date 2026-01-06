@@ -134,3 +134,36 @@ $ oc apply -f itms-zookeeper.yaml
 $ oc new-project zookeeper
 $ helm install my-zookeeper my-private-repo/zookeeper
 ```
+
+## 7. 클러스터 상태 확인
+> 상태 확인
+```
+$ oc exec my-zookeeper-0 -- sh -c "echo ruok | nc 127.0.0.1 2181"
+imok
+```
+
+> leader, follower 확인
+```
+$ oc exec my-zookeeper-0 -- sh -c "echo srvr | nc 127.0.0.1 2181 | grep Mode"
+Mode: follower
+
+$ oc exec my-zookeeper-1 -- sh -c "echo srvr | nc 127.0.0.1 2181 | grep Mode"
+Mode: follower
+
+$ oc exec my-zookeeper-2 -- sh -c "echo srvr | nc 127.0.0.1 2181| grep Mode"
+Mode: leader
+```
+
+> 읽기,쓰기 권한 확인
+```
+$ oc debug pod/my-zookeeper-0 --image=nexus.kscada.kdneri.com:5002/zookeeper/zookeeper:3.9.3-debian-12-r22
+$ /opt/bitnami/zookeeper/bin/zkCli.sh -server my-zookeeper-0.my-zookeeper-headless:2181
+[zk: my-zookeeper-0.my-zookeeper-headless:2181(CONNECTED) 0] ls /
+[zookeeper]
+[zk: my-zookeeper-0.my-zookeeper-headless:2181(CONNECTED) 1] create /my-test "hello"
+Created /my-test
+[zk: my-zookeeper-0.my-zookeeper-headless:2181(CONNECTED) 2] get /my-test
+hello
+[zk: my-zookeeper-0.my-zookeeper-headless:2181(CONNECTED) 3] delete /my-test
+[zk: my-zookeeper-0.my-zookeeper-headless:2181(CONNECTED) 4] exit
+```
