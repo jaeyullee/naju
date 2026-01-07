@@ -50,52 +50,52 @@ $ vi elastic-pvs.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv-eck-1
+  name: pv-es-ocp-1
   labels:
-    index: "infra-1"
+    index: "es-ocp-1"
 spec:
   capacity:
     storage: 100Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: nfs-es-1
+  storageClassName: nfs-es-ocp-1
   nfs:
-    path: /data/ocp/eck/pv1
+    path: /data/nfs-manual/eck/pv1
     server: xx.xx.xx.26
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv-eck-2
+  name: pv-es-ocp-2
   labels:
-    index: "infra-2"
+    index: "es-ocp-2"
 spec:
   capacity:
     storage: 100Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: nfs-es-2
+  storageClassName: nfs-es-ocp-2
   nfs:
-    path: /data/ocp/eck/pv2
+    path: /data/nfs-manual/eck/pv2
     server: xx.xx.xx.26
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv-eck-3
+  name: pv-es-ocp-3
   labels:
-    index: "infra-3"
+    index: "es-ocp-3"
 spec:
   capacity:
     storage: 100Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: nfs-es-3
+  storageClassName: nfs-es-ocp-3
   nfs:
-    path: /data/ocp/eck/pv3
+    path: /data/nfs-manual/eck/pv3
     server: xx.xx.xx.26
 ```
 ```
@@ -106,8 +106,8 @@ $ vi elasticsearch.yaml
 apiVersion: elasticsearch.k8s.elastic.co/v1
 kind: Elasticsearch
 metadata:
-  name: es-infra-cluster
-  namespace: elastic-infra
+  name: es-ocp
+  namespace: infra-es-ocp
 spec:
   nodeSets:
   - config:
@@ -118,16 +118,16 @@ spec:
       - ingest
       node.store.allow_mmap: false
     count: 1
-    name: node-1
+    name: es-ocp-1
     podTemplate:
       metadata:
         labels:
-          es: es-infra-cluster
+          es: es-ocp-1
       spec:
         containers:
         - env:
           - name: ES_JAVA_OPTS
-            value: -Xms2g -Xmx2g
+            value: -Xms4g -Xmx4g
           name: elasticsearch
           resources:
             limits:
@@ -149,7 +149,10 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: nfs-es-1
+        storageClassName: nfs-es-ocp-1
+        selector:
+          matchLabels:
+            index: "es-ocp-1"
   - config:
       node.attr.attr_name: node-2
       node.roles:
@@ -158,11 +161,11 @@ spec:
       - ingest
       node.store.allow_mmap: false
     count: 1
-    name: node-2
+    name: es-ocp-2
     podTemplate:
       metadata:
         labels:
-          es: es-infra-cluster
+          es: es-ocp-2
       spec:
         containers:
         - env:
@@ -189,7 +192,10 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: nfs-es-2
+        storageClassName: nfs-es-ocp-2
+        selector:
+          matchLabels:
+            index: "es-ocp-2"
   - config:
       node.attr.attr_name: node-3
       node.roles:
@@ -198,11 +204,11 @@ spec:
       - ingest
       node.store.allow_mmap: false
     count: 1
-    name: node-3
+    name: es-ocp-3
     podTemplate:
       metadata:
         labels:
-          es: es-infra-cluster
+          es: es-ocp-3
       spec:
         containers:
         - env:
@@ -229,10 +235,14 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: nfs-es-3
+        storageClassName: nfs-es-ocp-3
+        selector:
+          matchLabels:
+            index: "es-ocp-3"
   version: 9.2.0
 ```
 ```
+$ oc new-project infra-es-ocp
 $ oc apply -f elasticsearch.yaml
 ```
 
