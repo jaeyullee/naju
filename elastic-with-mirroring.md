@@ -255,7 +255,16 @@ $ oc new-project infra-es-ocp
 $ oc apply -f elasticsearch.yaml
 ```
 
-# 5. clusterLoggingForwarder 배포
+# 5. Elasticsearch Cluster 상태 확인
+```
+$ oc get elasticsearch -n infra-es-ocp
+$ oc exec -it es-ocp-es-es-ocp-1-0 -n infra-es-ocp -- curl -u "elastic:$PASSWORD" -k "https://localhost:9200/_cluster/health?pretty"
+$ oc exec -it es-ocp-es-es-ocp-1-0 -n infra-es-ocp -- curl -u "elastic:$PASSWORD" -k "https://localhost:9200/_cat/nodes?v"
+$ oc get secret es-ocp-es-elastic-user -n infra-es-ocp -o go-template='{{.data.elastic | base64decode}}'
+$ oc logs -f es-ocp-es-es-ocp-1-0 -n infra-es-ocp
+```
+
+# 6. clusterLoggingForwarder 배포
 ```
 $ oc create sa logging-collector -n openshift-logging
 $ oc adm policy add-cluster-role-to-user logging-collector-logs-writer -z logging-collector -n openshift-logging
