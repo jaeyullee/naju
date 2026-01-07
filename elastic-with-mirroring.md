@@ -84,7 +84,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv-eck-2
+  name: pv-eck-3
   labels:
     index: "infra-3"
 spec:
@@ -95,12 +95,142 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: nfs-es-3
   nfs:
-    path: /data/ocp/eck/pv2
+    path: /data/ocp/eck/pv3
     server: xx.xx.xx.26
 ```
 ```
+$ oc apply -f elastic-pvs.yaml
+```
+```
 $ vi elasticsearch.yaml
-~~~~ github 편집기가 먹통이라 붙여넣기 못함.
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: es-infra-cluster
+  namespace: elastic-infra
+spec:
+  nodeSets:
+  - config:
+      node.attr.attr_name: node-1
+      node.roles:
+      - master
+      - data
+      - ingest
+      node.store.allow_mmap: false
+    count: 1
+    name: node-1
+    podTemplate:
+      metadata:
+        labels:
+          es: es-infra-cluster
+      spec:
+        containers:
+        - env:
+          - name: ES_JAVA_OPTS
+            value: -Xms2g -Xmx2g
+          name: elasticsearch
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "4"
+              memory: 8Gi
+          readinessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 5
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: nfs-es-1
+  - config:
+      node.attr.attr_name: node-2
+      node.roles:
+      - master
+      - data
+      - ingest
+      node.store.allow_mmap: false
+    count: 1
+    name: node-2
+    podTemplate:
+      metadata:
+        labels:
+          es: es-infra-cluster
+      spec:
+        containers:
+        - env:
+          - name: ES_JAVA_OPTS
+            value: -Xms4g -Xmx4g
+          name: elasticsearch
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "4"
+              memory: 8Gi
+          readinessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 5
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: nfs-es-2
+  - config:
+      node.attr.attr_name: node-3
+      node.roles:
+      - master
+      - data
+      - ingest
+      node.store.allow_mmap: false
+    count: 1
+    name: node-3
+    podTemplate:
+      metadata:
+        labels:
+          es: es-infra-cluster
+      spec:
+        containers:
+        - env:
+          - name: ES_JAVA_OPTS
+            value: -Xms4g -Xmx4g
+          name: elasticsearch
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "4"
+              memory: 8Gi
+          readinessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 5
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: nfs-es-3
+  version: 9.2.0
 ```
 ```
 $ oc apply -f elasticsearch.yaml
