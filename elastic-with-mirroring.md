@@ -124,6 +124,13 @@ spec:
         labels:
           es: es-ocp-1
       spec:
+        nodeSelector:
+          node-role.kubernetes.io/infra: ""
+        tolerations:
+        - key: "role"
+          operator: "Equal"
+          value: "logging"
+          effect: "NoSchedule"
         containers:
         - env:
           - name: ES_JAVA_OPTS
@@ -136,10 +143,6 @@ spec:
             requests:
               cpu: "4"
               memory: 8Gi
-          readinessProbe:
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            failureThreshold: 5
     volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data
@@ -167,6 +170,13 @@ spec:
         labels:
           es: es-ocp-2
       spec:
+        nodeSelector:
+          node-role.kubernetes.io/infra: ""
+        tolerations:
+        - key: "role"
+          operator: "Equal"
+          value: "logging"
+          effect: "NoSchedule"
         containers:
         - env:
           - name: ES_JAVA_OPTS
@@ -179,10 +189,6 @@ spec:
             requests:
               cpu: "4"
               memory: 8Gi
-          readinessProbe:
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            failureThreshold: 5
     volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data
@@ -210,6 +216,13 @@ spec:
         labels:
           es: es-ocp-3
       spec:
+        nodeSelector:
+          node-role.kubernetes.io/infra: ""
+        tolerations:
+        - key: "role"
+          operator: "Equal"
+          value: "logging"
+          effect: "NoSchedule"
         containers:
         - env:
           - name: ES_JAVA_OPTS
@@ -222,10 +235,6 @@ spec:
             requests:
               cpu: "4"
               memory: 8Gi
-          readinessProbe:
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            failureThreshold: 5
     volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data
