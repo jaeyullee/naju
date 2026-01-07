@@ -23,7 +23,7 @@ metadata:
 spec:
   imageDigestMirrors:
   - mirrors:
-    - ocp-registry.xxx.xxx.xxx:5000/ocp-operators-mirror/elasticsearch
+    - ocp-registry.xxx.xxx.xxx:5000/oss/elasticsearch
     source: docker.elastic.co/elasticsearch
 ```
 ```
@@ -35,7 +35,7 @@ metadata:
 spec:
   imageTagMirrors:
   - mirrors:
-    - ocp-registry.xxx.xxx.xxx:5000/ocp-operators-mirror/elasticsearch
+    - ocp-registry.xxx.xxx.xxx:5000/oss/elasticsearch
     source: docker.elastic.co/elasticsearch/elasticsearch
 ```
 ```
