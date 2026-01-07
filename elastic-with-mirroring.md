@@ -36,7 +36,7 @@ spec:
   imageTagMirrors:
   - mirrors:
     - ocp-registry.xxx.xxx.xxx:5000/oss/elasticsearch
-    source: docker.elastic.co/elasticsearch/elasticsearch
+    source: docker.elastic.co/elasticsearch
 ```
 ```
 $ oc apply -f idms-elastic.yaml
