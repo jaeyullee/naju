@@ -9,8 +9,8 @@
 ```
 $ podman pull docker.elastic.io/elasticsearch/elasticsearch:9.2.0
 $ podman tag docker.elastic.io/elasticsearch/elasticsearch:9.2.0 bastion-nexus.kscada.kdneri.com:5000/ocp-operators-mirror/elasticsearch/elasticsearch:9.2.0
-$ podman push bastion-nexus.kscada.kdneri.com:5000/ocp-operators-mirror/elasticsearch/elasticsearch:9.2.0
-$ curl -u <id>:<pw> https://bastion-nexus.kscada.kdneri.com:5000/v2/_catalog
+$ podman push ocp-registry.xxx.xxx.xxx:5000/ocp-operators-mirror/elasticsearch/elasticsearch:9.2.0
+$ curl -u <id>:<pw> https://ocp-registry.xxx.xxx.xxx:5000/v2/_catalog
 ```
 
 # 3. elasticsearch 컨테이너 이미지 활용을 위한 미러링
@@ -23,7 +23,7 @@ metadata:
 spec:
   imageDigestMirrors:
   - mirrors:
-    - bastion-nexus.kscada.kdneri.com:5000/ocp-operators-mirror/elasticsearch
+    - ocp-registry.xxx.xxx.xxx:5000/ocp-operators-mirror/elasticsearch
     source: docker.elastic.co/elasticsearch
 ```
 ```
@@ -35,7 +35,7 @@ metadata:
 spec:
   imageTagMirrors:
   - mirrors:
-    - bastion-nexus.kscada.kdneri.com:5000/ocp-operators-mirror/elasticsearch
+    - ocp-registry.xxx.xxx.xxx:5000/ocp-operators-mirror/elasticsearch
     source: docker.elastic.co/elasticsearch/elasticsearch
 ```
 ```
@@ -62,7 +62,7 @@ spec:
   storageClassName: nfs-es-1
   nfs:
     path: /data/ocp/eck/pv1
-    server: 10.60.1.26
+    server: xx.xx.xx.xx
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -79,7 +79,7 @@ spec:
   storageClassName: nfs-es-2
   nfs:
     path: /data/ocp/eck/pv2
-    server: 10.60.1.26
+    server: xx.xx.xx.xx
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -96,7 +96,7 @@ spec:
   storageClassName: nfs-es-3
   nfs:
     path: /data/ocp/eck/pv2
-    server: 10.60.1.26
+    server: xx.xx.xx.xx
 ```
 ```
 $ vi elasticsearch.yaml
