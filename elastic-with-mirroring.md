@@ -62,7 +62,7 @@ spec:
   storageClassName: nfs-es-1
   nfs:
     path: /data/ocp/eck/pv1
-    server: xx.xx.xx.xx
+    server: xx.xx.xx.26
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -79,7 +79,7 @@ spec:
   storageClassName: nfs-es-2
   nfs:
     path: /data/ocp/eck/pv2
-    server: xx.xx.xx.xx
+    server: xx.xx.xx.26
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -96,7 +96,7 @@ spec:
   storageClassName: nfs-es-3
   nfs:
     path: /data/ocp/eck/pv2
-    server: xx.xx.xx.xx
+    server: xx.xx.xx.26
 ```
 ```
 $ vi elasticsearch.yaml
