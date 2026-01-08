@@ -15,18 +15,6 @@ $ curl -u <id>:<pw> https://ocp-registry.xxx.xxx.xxx:5000/v2/_catalog
 
 # 3. elasticsearch 컨테이너 이미지 활용을 위한 미러링
 ```
-$ vi idms-elastic.yaml
-apiVersion: config.openshift.io/v1
-kind: ImageDigestMirrorSet
-metadata:
-  name: elastic-mirror
-spec:
-  imageDigestMirrors:
-  - mirrors:
-    - ocp-registry.xxx.xxx.xxx:5000/oss/elasticsearch
-    source: docker.elastic.co/elasticsearch
-```
-```
 $ vi itms-elastic.yaml
 apiVersion: config.openshift.io/v1
 kind: ImageTagMirrorSet
@@ -39,7 +27,6 @@ spec:
     source: docker.elastic.co/elasticsearch
 ```
 ```
-$ oc apply -f idms-elastic.yaml
 $ oc apply -f itms-elastic.yaml
 $ watch oc get node,mcp
 ```
