@@ -45,8 +45,6 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name:  secret-reader
-
-$ oc apply -f gateway-sa.yaml
 ```
 ```
 $ vi gateway-deployment.yaml
@@ -85,8 +83,6 @@ spec:
             - containerPort: 9000
               protocol: TCP
       serviceAccountName: secret-reader
-
-$ oc apply -f gateway-deployment.yaml
 ```
 ```
 $ vi gateway-service.yaml
@@ -111,8 +107,7 @@ spec:
       port: 9000
       targetPort: 9000
       protocol: TCP
-
-$ oc apply -f gateway-service.yaml
+      nodePort: 31000
 ```
 ```
 $ vi gateway-cr.yaml
@@ -132,7 +127,11 @@ spec:
       protocol: TCP
     hosts:
     - "*"
-
+```
+```
+$ oc apply -f gateway-sa.yaml
+$ oc apply -f gateway-deployment.yaml
+$ oc apply -f gateway-service.yaml
 $ oc apply -f gateway-cr.yaml
 ```
 ```
@@ -185,7 +184,7 @@ spec:
     protocol: TCP
 ```
 ```
-$ vs-tcp.yaml
+$ tcp-vs.yaml
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -207,7 +206,7 @@ spec:
 ```
 ```
 $ oc apply -f tcp-app.yaml
-$ oc apply -f vs-tcp.yaml
+$ oc apply -f tcp-vs.yaml
 ```
 ```
 $ oc get po,svc,virtualservice -n tcp-app-ns
