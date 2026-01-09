@@ -1,6 +1,36 @@
 > TCPRoute는 최신버전인 ServiceMesh 3.2에서도 Ambient Mode에서만 D.P. 기능으로 제공하고 있음
 
 # 1. servicemesh3 오퍼레이터의 최신버전 미러링 및 catalogsource,idms 등록
+```
+$ imageset-config.yaml
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v2alpha1
+mirror:
+  operators:
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.20
+    packages:
+      - name: servicemeshoperator3
+        defaultChannel: stable-3.2
+        channels:
+        - name: stable-3.2
+          minVersion: 3.2.1
+          maxVersion: 3.2.1
+```
+```
+$ oc mirror --v2 --config=./imageset-config.yaml   docker://nexus.kscada.kdneri.com:5002/servicemesh-3-2-1  --workspace=file://./mirror-sm3   --authfile=/root/pull-secret.json
+```
+```
+$ mv ./mirror-sm3/working-dir/cluster-resources
+$ ls
+```
+> cc-*, cs-*, idms-*, itms-* 파일 내의 .metadata.name 을 변경하여 기존에 등록된 오브젝트를 덮어쓰거나 충돌하지 않도록 해야합니다.
+```
+$ oc create -f .
+$ oc get idms,itms
+$ oc get catalogsource -n openshift-marketplace
+$ watch -n 1 oc get node,mcp
+```
+
 
 # 2. console에서 operator 설치
 
