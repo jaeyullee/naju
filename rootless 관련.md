@@ -15,6 +15,13 @@ RUN chgrp -R 0 /opt/ignite/apache-ignite && \
 # 다시 ignite 유저로 전환 (또는 OCP 랜덤 유저 사용을 위해 생략)
 USER ignite
 ```
+> Root Group 권한 부여 방식 대신 non-root-v2 SCC를 해당 프로젝트에 부여하는 방법도 있습니다.
+구분|GID 0 전략 (OpenShift 기본)|nonroot-v2 SCC 부여 (옵션)|
+|UID 할당|랜덤 (예: 1000670000)|고정 (예: 1000)|
+|보안 강도|🔒 최상 (Best)|🔓 보통 (OpenShift 기준 낮아짐)|
+|관리자 개입,없음 (그냥 배포하면 됨)|필요 (ServiceAccount, RoleBinding 생성)|
+|이미지 요건|까다로움 (chgrp 0, chmod g=u 필수)|관대함 (일반 Dockerfile도 잘 됨)|
+|NFS 소유권|랜덤 숫자로 저장됨 (관리 불편)|1000으로 저장됨 (관리 편함)|
 
 # 2. readOnlyRootFilesystem SecurityContext 설정
 > 이 설정은 **"불변 인프라(Immutable Infrastructure)"**를 구현하는 핵심 기술입니다. <br/>
