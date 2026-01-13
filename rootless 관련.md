@@ -21,7 +21,7 @@ USER ignite
 |:---|:---|:---|
 |UID 할당|랜덤 (예: 1000670000)|고정 (예: 1000)|
 |보안 강도|🔒 최상 (Best)|🔓 보통 (OpenShift 기준 낮아짐)|
-|관리자 개입,없음 (그냥 배포하면 됨)|필요 (ServiceAccount, RoleBinding 생성)|
+|관리자 개입|없음 (그냥 배포하면 됨)|필요 (ServiceAccount, RoleBinding 생성)|
 |이미지 요건|까다로움 (chgrp 0, chmod g=u 필수)|관대함 (일반 Dockerfile도 잘 됨)|
 |NFS 소유권|랜덤 숫자로 저장됨 (관리 불편)|1000으로 저장됨 (관리 편함)|
 
