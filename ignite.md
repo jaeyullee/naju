@@ -262,4 +262,43 @@ $ oc create -f ignite-headless-svc.yaml
 $ oc create -f ignite-sts.yaml
 ```
 
-# 4. 
+# 4. Ignite 클러스터 초기화
+```
+$ oc exec -it ignite-node-0 -n kscada-mw-ignite -- /opt/ignite/apache-ignite/bin/ignite3 cluster init \
+    --cluster-name=my-cluster \
+    --meta-storage-node=ignite-node-0,ignite-node-1,ignite-node-2
+```
+
+# 5. Ignite 클러스터 상태 점검
+```
+$ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
+  /opt/ignite/apache-ignite/bin/ignite3 cluster status
+```
+> Cluster status:
+>   Name: my-cluster        <-- 아까 init 할 때 지은 이름
+>   State: ACTIVE           <-- [중요] ACTIVE 상태여야 함
+>   Health: HEALTHY         <-- HEALTHY 여야 함
+```
+$ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
+  /opt/ignite/apache-ignite/bin/ignite3 cluster topology logical
+```
+> Logical topology:
+>   ignite-node-0 (id: ... , address: 10.128.x.x:3344)
+>   ignite-node-1 (id: ... , address: 10.128.x.x:3344)
+>   ignite-node-2 (id: ... , address: 10.128.x.x:3344)
+>   
+> Total: 3 nodes   <-- [중요] 반드시 3개가 보여야 성공!
+```
+$ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
+  curl -s http://localhost:10300/management/v1/cluster/state
+```
+> {
+>   "clusterTag": { ... },
+>   "igniteVersion": "3.1.0",
+>   "name": "my-cluster",
+>   "state": "ACTIVE"      <-- 여기가 핵심
+> }
+```
+$ oc logs ignite-node-0 -n kscada-mw-ignite | grep "Topology"
+```
+> ... Topology snapshot: [nodes=3] ...
