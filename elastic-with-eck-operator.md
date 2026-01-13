@@ -37,64 +37,62 @@ $ vi elastic-pvs.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv-es-ocp-1
+  name: pv-ocp-es-1
+  namespace: ocp-es
   labels:
-    index: "es-ocp-1"
+    index: "ocp-es-1"
 spec:
   capacity:
     storage: 100Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: nfs-es-ocp-1
+  storageClassName: ""
   nfs:
     path: /data/nfs-manual/eck/pv1
-    server: xx.xx.xx.26
+    server: 10.60.1.26
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv-es-ocp-2
+  name: pv-ocp-es-2
   labels:
-    index: "es-ocp-2"
+    index: "ocp-es-2"
 spec:
   capacity:
     storage: 100Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: nfs-es-ocp-2
+  storageClassName: ""
   nfs:
     path: /data/nfs-manual/eck/pv2
-    server: xx.xx.xx.26
+    server: 10.60.1.26
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv-es-ocp-3
+  name: pv-ocp-es-3
   labels:
-    index: "es-ocp-3"
+    index: "ocp-es-3"
 spec:
   capacity:
     storage: 100Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: nfs-es-ocp-3
+  storageClassName: ""
   nfs:
     path: /data/nfs-manual/eck/pv3
-    server: xx.xx.xx.26
-```
-```
-$ oc apply -f elastic-pvs.yaml
+    server: 10.60.1.26
 ```
 ```
 $ vi elasticsearch.yaml
 apiVersion: elasticsearch.k8s.elastic.co/v1
 kind: Elasticsearch
 metadata:
-  name: es-ocp
-  namespace: infra-es-ocp
+  name: ocp
+  namespace: ocp-es
 spec:
   nodeSets:
   - config:
@@ -105,14 +103,14 @@ spec:
       - ingest
       node.store.allow_mmap: false
     count: 1
-    name: es-ocp-1
+    name: node-1
     podTemplate:
       metadata:
         labels:
-          es: es-ocp-1
+          es: ocp-es
       spec:
         nodeSelector:
-          node-role.kubernetes.io/infra: ""
+          node-role.kubernetes.io/logging: ""
         tolerations:
         - key: "role"
           operator: "Equal"
@@ -139,10 +137,10 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: nfs-es-ocp-1
+        storageClassName: ""
         selector:
           matchLabels:
-            index: "es-ocp-1"
+            index: "ocp-es-1"
   - config:
       node.attr.attr_name: node-2
       node.roles:
@@ -151,14 +149,14 @@ spec:
       - ingest
       node.store.allow_mmap: false
     count: 1
-    name: es-ocp-2
+    name: node-2
     podTemplate:
       metadata:
         labels:
-          es: es-ocp-2
+          es: ocp-es
       spec:
         nodeSelector:
-          node-role.kubernetes.io/infra: ""
+          node-role.kubernetes.io/logging: ""
         tolerations:
         - key: "role"
           operator: "Equal"
@@ -185,10 +183,10 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: nfs-es-ocp-2
+        storageClassName: ""
         selector:
           matchLabels:
-            index: "es-ocp-2"
+            index: "ocp-es-2"
   - config:
       node.attr.attr_name: node-3
       node.roles:
@@ -197,14 +195,14 @@ spec:
       - ingest
       node.store.allow_mmap: false
     count: 1
-    name: es-ocp-3
+    name: node-3
     podTemplate:
       metadata:
         labels:
-          es: es-ocp-3
+          es: ocp-es
       spec:
         nodeSelector:
-          node-role.kubernetes.io/infra: ""
+          node-role.kubernetes.io/logging: ""
         tolerations:
         - key: "role"
           operator: "Equal"
@@ -231,24 +229,25 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: nfs-es-ocp-3
+        storageClassName: ""
         selector:
           matchLabels:
-            index: "es-ocp-3"
+            index: "ocp-es-3"
   version: 9.2.0
 ```
 ```
-$ oc new-project infra-es-ocp
+$ oc new-project ocp-es
+$ oc apply -f elastic-pvs.yaml
 $ oc apply -f elasticsearch.yaml
 ```
 
 # 5. Elasticsearch Cluster 상태 확인
 ```
-$ oc get elasticsearch -n infra-es-ocp
-$ PASSWORD=$(oc get secret es-ocp-es-elastic-user -n infra-es-ocp -o go-template='{{.data.elastic | base64decode}}')
-$ oc exec -it es-ocp-es-es-ocp-1-0 -n infra-es-ocp -- curl -u "elastic:$PASSWORD" -k "https://localhost:9200/_cluster/health?pretty"
-$ oc exec -it es-ocp-es-es-ocp-1-0 -n infra-es-ocp -- curl -u "elastic:$PASSWORD" -k "https://localhost:9200/_cat/nodes?v"
-$ oc logs -f es-ocp-es-es-ocp-1-0 -n infra-es-ocp
+$ oc get elasticsearch -n ocp-es
+$ PASSWORD=$(oc get secret es-ocp-es-elastic-user -n ocp-es -o go-template='{{.data.elastic | base64decode}}')
+$ oc exec -it es-ocp-es-es-ocp-1-0 -n ocp-es -- curl -u "elastic:$PASSWORD" -k "https://localhost:9200/_cluster/health?pretty"
+$ oc exec -it es-ocp-es-es-ocp-1-0 -n ocp-es -- curl -u "elastic:$PASSWORD" -k "https://localhost:9200/_cat/nodes?v"
+$ oc logs -f es-ocp-es-es-ocp-1-0 -n ocp-es
 ```
 
 # 6. clusterLoggingForwarder 배포
