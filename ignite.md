@@ -1,8 +1,8 @@
 > 고객이 AS-IS 에서 테스트 중인 내용 기반으로 수정하여 작성하였습니다.
 
 # 1. Ignite 이미지 재빌드
-> OCP에서는 파드 배포시 해당 네임스페이스에 할당된 범위의 임의의 사용자 ID (ex. 1000580000)를 할당하기 때문에 파일시스템 접근권한 에러가 발생합니다.
-> 이를 해결하기 위해 root(0) 그룹 ID 권한을 부여하는 방안을 권장합니다. [[참고]  <br/>(https://docs.redhat.com/ko/documentation/openshift_container_platform/4.20/html/images/creating-images#use-uid_create-images)]
+> OCP에서는 파드 배포시 해당 네임스페이스에 할당된 범위의 임의의 사용자 ID (ex. 1000580000)를 할당하기 때문에 파일시스템 접근권한 에러가 발생합니다.  <br/>
+> 이를 해결하기 위해 root(0) 그룹 ID 권한을 부여하는 방안을 권장합니다. [[참고] (https://docs.redhat.com/ko/documentation/openshift_container_platform/4.20/html/images/creating-images#use-uid_create-images)]
 ```
 $ vi Dockerfile
 FROM apacheignite/ignite:3.1.0
