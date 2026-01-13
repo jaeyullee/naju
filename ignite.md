@@ -260,6 +260,7 @@ spec:
 ```
 $ oc new-project kscada-main-mw-ignite
 $ oc create -f ignite-pvs.yaml
+$ oc create -f ignite-cm.yaml
 $ oc create -f ignite-headless-svc.yaml
 $ oc create -f ignite-sts.yaml
 ```
