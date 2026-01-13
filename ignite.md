@@ -249,10 +249,10 @@ spec:
         storageClassName: ''
         volumeMode: Filesystem
 ```
-> 컨테이너를 32GB나 잡았는데 JVM(10GB) + Direct(4GB) = 총 14GB 정도만 명시적으로 쓰고 있습니다.
-> 다음과 같은 튜닝을 추천합니다.
+> 컨테이너를 32GB나 잡았는데 JVM(10GB) + Direct(4GB) = 총 14GB 정도만 명시적으로 쓰고 있습니다. <br/>
+> 다음과 같은 튜닝을 추천합니다. <br/>
 > 튜닝방안1) JVM 10g, Direct 4g, Stack 512k <br/>
-> - 컨테이너 리소스 24GB, JVM_MIN_MEM: 10g, JVM_MAX_MEM: 10g, JAVA_OPTS: -XX:+UseG1GC -Xms10g -Xmx10g -Xss512k -XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=45 -XX:G1HeapRegionSize=16M -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=30 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:MaxDirectMemorySize=4G -Xlog:gc*:file=/opt/ignite/work/gc.log:time,level -Dignite.system.criticalWorkers.maxAllowedLagMillis=20000 -Dignite.network.connectTimeout=30000 -Dignite.network.idleTimeout=60000
+> - 컨테이너 리소스 24GB, JVM_MIN_MEM: 10g, JVM_MAX_MEM: 10g, JAVA_OPTS: -XX:+UseG1GC -Xms10g -Xmx10g -Xss512k -XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=45 -XX:G1HeapRegionSize=16M -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=30 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:MaxDirectMemorySize=4G -Xlog:gc*:file=/opt/ignite/work/gc.log:time,level -Dignite.system.criticalWorkers.maxAllowedLagMillis=20000 -Dignite.network.connectTimeout=30000 -Dignite.network.idleTimeout=60000 <br/>
 > 튜닝방안2) JVM 16g, Direct 8g, Stack 512k <br/>
 > - 컨테이너 리소스 32GB, JVM_MIN_MEM: 16g, JVM_MAX_MEM: 16g, JAVA_OPTS: -XX:+UseG1GC -Xms16g -Xmx16g -Xss512k -XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=45 -XX:G1HeapRegionSize=16M -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=30 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:MaxDirectMemorySize=8G -Xlog:gc*:file=/opt/ignite/work/gc.log:time,level -Dignite.system.criticalWorkers.maxAllowedLagMillis=20000 -Dignite.network.connectTimeout=30000 -Dignite.network.idleTimeout=60000
 ```
@@ -274,29 +274,29 @@ $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- /opt/ignite/apache-ignite/bin
 $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
   /opt/ignite/apache-ignite/bin/ignite3 cluster status
 ```
-> Cluster status:
->   Name: my-cluster        <-- 아까 init 할 때 지은 이름
->   State: ACTIVE           <-- [중요] ACTIVE 상태여야 함
+> Cluster status: <br/>
+>   Name: my-cluster        <-- 아까 init 할 때 지은 이름 <br/>
+>   State: ACTIVE           <-- [중요] ACTIVE 상태여야 함 <br/>
 >   Health: HEALTHY         <-- HEALTHY 여야 함
 ```
 $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
   /opt/ignite/apache-ignite/bin/ignite3 cluster topology logical
 ```
-> Logical topology:
->   ignite-node-0 (id: ... , address: 10.128.x.x:3344)
->   ignite-node-1 (id: ... , address: 10.128.x.x:3344)
->   ignite-node-2 (id: ... , address: 10.128.x.x:3344)
->   
+> Logical topology: <br/>
+>   ignite-node-0 (id: ... , address: 10.128.x.x:3344) <br/>
+>   ignite-node-1 (id: ... , address: 10.128.x.x:3344) <br/>
+>   ignite-node-2 (id: ... , address: 10.128.x.x:3344) <br/>
+>    <br/>
 > Total: 3 nodes   <-- [중요] 반드시 3개가 보여야 성공!
 ```
 $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
   curl -s http://localhost:10300/management/v1/cluster/state
 ```
-> {
->   "clusterTag": { ... },
->   "igniteVersion": "3.1.0",
->   "name": "my-cluster",
->   "state": "ACTIVE"      <-- 여기가 핵심
+> { <br/>
+>   "clusterTag": { ... }, <br/>
+>   "igniteVersion": "3.1.0", <br/>
+>   "name": "my-cluster", <br/>
+>   "state": "ACTIVE"      <-- 여기가 핵심 <br/>
 > }
 ```
 $ oc logs ignite-node-0 -n kscada-mw-ignite | grep "Topology"
