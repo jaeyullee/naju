@@ -8,7 +8,7 @@
 > nexus의 도커 레지스트리에 elasticsearch 이미지를 푸시할 경로는 ocp-operators-mirror/eck로 가정.
 ```
 $ podman pull docker.elastic.io/elasticsearch/elasticsearch:9.2.0
-$ podman tag docker.elastic.io/elasticsearch/elasticsearch:9.2.0 bastion-nexus.kscada.kdneri.com:5000/ocp-operators-mirror/elasticsearch/elasticsearch:9.2.0
+$ podman tag docker.elastic.io/elasticsearch/elasticsearch:9.2.0 ocp-registry.xxx.xxx.xxx:5000/ocp-operators-mirror/elasticsearch/elasticsearch:9.2.0
 $ podman push ocp-registry.xxx.xxx.xxx:5000/ocp-operators-mirror/elasticsearch/elasticsearch:9.2.0
 $ curl -u <id>:<pw> https://ocp-registry.xxx.xxx.xxx:5000/v2/_catalog
 ```
@@ -50,7 +50,7 @@ spec:
   storageClassName: ""
   nfs:
     path: /data/nfs-manual/eck/pv1
-    server: 10.60.1.26
+    server: xx.xx.xx.26
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -67,7 +67,7 @@ spec:
   storageClassName: ""
   nfs:
     path: /data/nfs-manual/eck/pv2
-    server: 10.60.1.26
+    server: xx.xx.xx.26
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -84,7 +84,7 @@ spec:
   storageClassName: ""
   nfs:
     path: /data/nfs-manual/eck/pv3
-    server: 10.60.1.26
+    server: xx.xx.xx.26
 ```
 ```
 $ vi elasticsearch.yaml
@@ -244,10 +244,10 @@ $ oc apply -f elasticsearch.yaml
 # 5. Elasticsearch Cluster 상태 확인
 ```
 $ oc get elasticsearch -n ocp-es
-$ PASSWORD=$(oc get secret es-ocp-es-elastic-user -n ocp-es -o go-template='{{.data.elastic | base64decode}}')
-$ oc exec -it es-ocp-es-es-ocp-1-0 -n ocp-es -- curl -u "elastic:$PASSWORD" -k "https://localhost:9200/_cluster/health?pretty"
-$ oc exec -it es-ocp-es-es-ocp-1-0 -n ocp-es -- curl -u "elastic:$PASSWORD" -k "https://localhost:9200/_cat/nodes?v"
-$ oc logs -f es-ocp-es-es-ocp-1-0 -n ocp-es
+$ PASSWORD=$(oc get secret ocp-es-elastic-user -n ocp-es -o go-template='{{.data.elastic | base64decode}}')
+$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:$PASSWORD" -k "https://localhost:9200/_cluster/health?pretty"
+$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:$PASSWORD" -k "https://localhost:9200/_cat/nodes?v"
+$ oc logs -f ocp-es-node-1-0 -n ocp-es
 ```
 
 # 6. clusterLoggingForwarder 배포
@@ -259,7 +259,7 @@ $ oc adm policy add-cluster-role-to-user collect-infrastructure-logs -z logging-
 $ oc adm policy add-cluster-role-to-user collect-audit-logs -z logging-collector -n openshift-logging
 ```
 ```
-$ ELASTIC_PASSWORD=$(oc get secret es-infra-cluster-es-elastic-user -n elastic-infra -o jsonpath='{.data.elastic}' |base64 -d)
+$ ELASTIC_PASSWORD=$(oc get secret ocp-es-elastic-user -n ocp-es -o jsonpath='{.data.elastic}' |base64 -d)
 $ oc create secret generic eck-secret --from-literal=username=elastic --from-literal=password=$ELASTIC_PASSWORD -n openshift-logging
 ```
 > 아래 clusterlogforwarder는 infrastructure 로그만 전송하게 설정했음.
@@ -278,7 +278,7 @@ spec:
   - name: eck-elasticsearch
     type: elasticsearch
     elasticsearch:
-      url: https://es-infra-cluster-es-http.elastic-infra.svc:9200
+      url: https://ocp-es-http.ocp-es.svc:9200
       index: "infra-logs"
       version: 8  # 8.x 버전 이상은 무조건 8로 통일
       authentication:
