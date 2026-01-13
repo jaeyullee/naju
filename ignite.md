@@ -251,9 +251,9 @@ spec:
 ```
 > 컨테이너를 32GB나 잡았는데 JVM(10GB) + Direct(4GB) = 총 14GB 정도만 명시적으로 쓰고 있습니다.
 > 다음과 같은 튜닝을 추천합니다.
-> 튜닝방안1) JVM 10g, Direct 4g, Stack 512k
+> 튜닝방안1) JVM 10g, Direct 4g, Stack 512k <br/>
 > - 컨테이너 리소스 24GB, JVM_MIN_MEM: 10g, JVM_MAX_MEM: 10g, JAVA_OPTS: -XX:+UseG1GC -Xms10g -Xmx10g -Xss512k -XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=45 -XX:G1HeapRegionSize=16M -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=30 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:MaxDirectMemorySize=4G -Xlog:gc*:file=/opt/ignite/work/gc.log:time,level -Dignite.system.criticalWorkers.maxAllowedLagMillis=20000 -Dignite.network.connectTimeout=30000 -Dignite.network.idleTimeout=60000
-> 튜닝방안2) JVM 16g, Direct 8g, Stack 512k
+> 튜닝방안2) JVM 16g, Direct 8g, Stack 512k <br/>
 > - 컨테이너 리소스 32GB, JVM_MIN_MEM: 16g, JVM_MAX_MEM: 16g, JAVA_OPTS: -XX:+UseG1GC -Xms16g -Xmx16g -Xss512k -XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=45 -XX:G1HeapRegionSize=16M -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=30 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:MaxDirectMemorySize=8G -Xlog:gc*:file=/opt/ignite/work/gc.log:time,level -Dignite.system.criticalWorkers.maxAllowedLagMillis=20000 -Dignite.network.connectTimeout=30000 -Dignite.network.idleTimeout=60000
 ```
 $ oc new-project kscada-main-mw-ignite
