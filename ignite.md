@@ -2,7 +2,7 @@
 
 # 1. Ignite 이미지 재빌드
 > OCP에서는 파드 배포시 해당 네임스페이스에 할당된 범위의 임의의 사용자 ID (ex. 1000580000)를 할당하기 때문에 파일시스템 접근권한 에러가 발생합니다.
-> 이를 해결하기 위해 root(0) 그룹 ID 권한을 부여하는 방안을 권장합니다. [[참고](https://docs.redhat.com/ko/documentation/openshift_container_platform/4.20/html/images/creating-images#use-uid_create-images)]
+> 이를 해결하기 위해 root(0) 그룹 ID 권한을 부여하는 방안을 권장합니다. [[참고]  <br/>(https://docs.redhat.com/ko/documentation/openshift_container_platform/4.20/html/images/creating-images#use-uid_create-images)]
 ```
 $ vi Dockerfile
 FROM apacheignite/ignite:3.1.0
@@ -251,8 +251,10 @@ spec:
 ```
 > 컨테이너를 32GB나 잡았는데 JVM(10GB) + Direct(4GB) = 총 14GB 정도만 명시적으로 쓰고 있습니다. <br/>
 > 다음과 같은 튜닝을 추천합니다. <br/>
+
 > 튜닝방안1) JVM 10g, Direct 4g, Stack 512k <br/>
-> - 컨테이너 리소스 24GB, JVM_MIN_MEM: 10g, JVM_MAX_MEM: 10g, JAVA_OPTS: -XX:+UseG1GC -Xms10g -Xmx10g -Xss512k -XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=45 -XX:G1HeapRegionSize=16M -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=30 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:MaxDirectMemorySize=4G -Xlog:gc*:file=/opt/ignite/work/gc.log:time,level -Dignite.system.criticalWorkers.maxAllowedLagMillis=20000 -Dignite.network.connectTimeout=30000 -Dignite.network.idleTimeout=60000 <br/>
+> - 컨테이너 리소스 24GB, JVM_MIN_MEM: 10g, JVM_MAX_MEM: 10g, JAVA_OPTS: -XX:+UseG1GC -Xms10g -Xmx10g -Xss512k -XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=45 -XX:G1HeapRegionSize=16M -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=30 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:MaxDirectMemorySize=4G -Xlog:gc*:file=/opt/ignite/work/gc.log:time,level -Dignite.system.criticalWorkers.maxAllowedLagMillis=20000 -Dignite.network.connectTimeout=30000 -Dignite.network.idleTimeout=60000
+
 > 튜닝방안2) JVM 16g, Direct 8g, Stack 512k <br/>
 > - 컨테이너 리소스 32GB, JVM_MIN_MEM: 16g, JVM_MAX_MEM: 16g, JAVA_OPTS: -XX:+UseG1GC -Xms16g -Xmx16g -Xss512k -XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=45 -XX:G1HeapRegionSize=16M -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=30 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:MaxDirectMemorySize=8G -Xlog:gc*:file=/opt/ignite/work/gc.log:time,level -Dignite.system.criticalWorkers.maxAllowedLagMillis=20000 -Dignite.network.connectTimeout=30000 -Dignite.network.idleTimeout=60000
 ```
