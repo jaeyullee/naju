@@ -260,7 +260,7 @@ $ oc adm policy add-cluster-role-to-user collect-audit-logs -z logging-collector
 ```
 ```
 $ ELASTIC_PASSWORD=$(oc get secret ocp-es-elastic-user -n ocp-es -o jsonpath='{.data.elastic}' |base64 -d)
-$ oc create secret generic eck-secret --from-literal=username=elastic --from-literal=password=$ELASTIC_PASSWORD -n openshift-logging
+$ oc create secret generic ocp-es-secret --from-literal=username=elastic --from-literal=password=$ELASTIC_PASSWORD -n openshift-logging
 ```
 > 아래 clusterlogforwarder는 infrastructure 로그만 전송하게 설정했음.
 > application 으로 분류되지만 인프라 성격의 operator 로그들 전송 및 audit 로그 전송 설정 필요함.
@@ -283,7 +283,7 @@ spec:
       version: 8  # 8.x 버전 이상은 무조건 8로 통일
       authentication:
         username:
-          secretName: eck-secret
+          secretName: ocp-es-secret
           key: username
         password:
           secretName: eck-secret
