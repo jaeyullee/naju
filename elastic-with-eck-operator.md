@@ -474,7 +474,7 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XPOST "
     "full_name" : "Admin User"
   }'
 $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k \
-  -XPOST "https://localhost:9200/_security/user/kibana-admin" \
+  -XPOST "https://localhost:9200/_security/user/kibanaadmin" \
   -H "Content-Type: application/json" \
   -d '{
     "password" : "redhat1!",
