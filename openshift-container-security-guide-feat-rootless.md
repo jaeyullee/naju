@@ -16,7 +16,8 @@ RUN chgrp -R 0 /opt/ignite/apache-ignite && \
 USER ignite
 ```
 > Root Group 권한 부여 방식 대신 non-root-v2 SCC를 해당 프로젝트에 부여하는 방법도 있습니다. <br/>
-> OCP 관리자 측면에서는 GID 사용이 유리하고, 스토리지 관리자(NFS) 측면에서는 SCC가 더 유리합니다.
+> SCC를 사용하여 파드에 특정 UID를 허용할 경우, 다른 파드의 nfs볼륨 침범위험이 있습니다. (즉, Fixed UID를 허용하는 순간, 프로젝트 간의 "커널 레벨 강제 격리" 장벽 하나를 스스로 허무는 셈이 됩니다.) <br/>
+> 또한 SCC 관점에서 보더라도 가장 보안적으로 강력한 Restricted를 쓰지않고 non-root-v2를 허용한다는 것 자체로 보안등급을 낮추는 셈입니다.
 
 |**구분**|**GID 0 전략 (OpenShift 기본)**|**nonroot-v2 SCC 부여 (옵션)**|
 |:---|:---|:---|
@@ -25,6 +26,16 @@ USER ignite
 |관리자 개입|없음 (그냥 배포하면 됨)|필요 (ServiceAccount, RoleBinding 생성)|
 |이미지 요건|까다로움 (chgrp 0, chmod g=u 필수)|관대함 (일반 Dockerfile도 잘 됨)|
 |NFS 소유권|랜덤 숫자로 저장됨 (관리 불편)|1000으로 저장됨 (관리 편함)|
+
+> * GID 0 (기본)을 추천하는 경우:
+>     * 보안 규정이 엄격한 금융/공공 프로젝트인 경우.
+>     * NFS가 아닌 **Block Storage (RBD, EBS 등)**를 사용하여 파일 소유권 숫자를 직접 볼 일이 없는 경우.
+>     * 이미지(Dockerfile)를 내가 직접 수정하고 관리할 수 있는 경우.
+> * nonroot-v2 SCC를 추천하는 경우:
+>     * 지금처럼 NFS를 사용하며, 파일 소유권 관리가 명확해야 하는 경우.
+>     * 이미지를 수정하기 어렵거나, Dockerfile을 건드리기 싫은 경우.
+>     * 개발/테스트 환경이라 보안보다는 편의성이 우선인 경우.
+
 
 # 2. readOnlyRootFilesystem SecurityContext 설정
 > 이 설정은 **"불변 인프라(Immutable Infrastructure)"**를 구현하는 핵심 기술입니다. <br/>
@@ -42,6 +53,11 @@ spec:
 ```
 > 주의사항 : 쓰기 권한이 필요한 모든 경로가 막히기 때문에 해당 Application이 꼭 써야하는 경로는 별도 볼륨 마운트 필요 <br/>
 > ex) Ignite 같은 경우 /opt/ignite 와 /tmp 인데, /opt/ignite는 PV를 할당하므로 /tmp에 대한 emptyDir 할당 필요
+
+> readOnlyRootFilesystem 를 설정하는 것은 GID 0 전략과 궁합이 아주 잘 맞습니다.
+> 루트 파일 시스템: 읽기 전용으로 잠김 (보안 OK)
+> 데이터 폴더 (/opt/ignite/work): PVC가 마운트됨. GID 0 권한으로 쓰기 가능 (동작 OK)
+> 임시 폴더 (/tmp): emptyDir 볼륨이 마운트됨. OpenShift가 생성 시 자동으로 쓰기 권한을 줌 (동작 OK)
 
 # 3. YAML 예시
 ```
