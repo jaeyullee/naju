@@ -389,7 +389,7 @@ $ oc extract -n ocp-es secret/ocp-es-elastic-user --to=-
 $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k \
     -XPOST "https://localhost:9200/_security/service/elastic/kibana/credential/token/ocp-custom-token?pretty"
 ```
-> 생성된 토큰 값 복!
+> 생성된 토큰 값 복사!
 ```
 $ oc create secret generic kibana-manual-token -n ocp-es \
   --from-literal=token=[복사한_토큰_값] \
