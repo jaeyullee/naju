@@ -272,6 +272,9 @@ metadata:
   name: infra-logforwarder-instance
   namespace: openshift-logging
 spec:
+  collector:
+    tolerations:
+    - operator: Exists
   serviceAccount:
     name: logging-collector
   outputs:
