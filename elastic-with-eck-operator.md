@@ -474,7 +474,7 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XPOST "
     "full_name" : "Admin User"
   }'
 ```
-> 유저 role 리스트
+> 유저 role 리스트 <br/>
 |역할 이름|권한 범위|용도|
 |:---|:---|:---|
 |cluster_admin|클러스터의 모든 관리 권한 (노드 설정, 스냅샷, 샤드 재배치 등)|인프라 운영자용|
