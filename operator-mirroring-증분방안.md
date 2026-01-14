@@ -57,7 +57,8 @@ $ podman push nexus.xxx.xxx.xxx:5001/olm/redhat-index:v4.20-final
 
 :question: 2차 업그레이드 작업 시 업그레이드 할 미러들은 어디로 반입해야하는가? 어느 미러를 정리해야하는가?
 
-
+<br/>
+<br/>
 # 이에 대한 해결책으로 아래 방안들을 검토할 수 있습니다.
 
 ### 전략 1. '베이스(Base) 레지스트리' 유지 및 누적 전략 <br/>
