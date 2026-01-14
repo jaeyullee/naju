@@ -473,7 +473,24 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XPOST "
     "roles" : [ "superuser" ],
     "full_name" : "Admin User"
   }'
+$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k \
+  -XPOST "https://localhost:9200/_security/user/kibana-admin" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "password" : "redhat1!",
+    "roles" : [ "kibana_admin", "viewer" ],
+    "full_name" : "Kibana Admin User"
+  }'
 ```
+* 삭제
+```
+$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XDELETE "https://localhost:9200/_security/user/admin"
+```
+* 조회
+```
+$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XGET "https://localhost:9200/_security/user"
+```
+<br/>
 > 유저 role 리스트 <br/>
 
 |**역할구분**|**역할 이름**|**권한 범위**|**용도**|
@@ -489,12 +506,5 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XPOST "
 |&nbsp;|kibana_admin|Kibana의 모든 기능 사용 (대시보드 생성, 설정 변경 등)|Kibana 관리자|
 |&nbsp;|kibana_user|Kibana 메뉴 접속 및 대시보드 확인 가능|일반 분석가|
 |&nbsp;|monitoring_user|Kibana 내의 Stack Monitoring 메뉴 확인 가능|시스템 관제|
-
-* 삭제
-```
-$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XDELETE "https://localhost:9200/_security/user/admin"
-```
-* 조회
-```
-$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XGET "https://localhost:9200/_security/user"
-```
+<br/>
+> [[참고문서]]https://www.elastic.co/docs/api/doc/elasticsearch
