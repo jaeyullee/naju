@@ -59,7 +59,7 @@ $ podman push nexus.xxx.xxx.xxx:5001/olm/redhat-index:v4.20-final
 
 <br/>
 
-# 이에 대한 해결책으로 아래 방안들을 검토할 수 있습니다.
+# :exclamation: 이에 대한 해결책으로 아래 방안들을 검토할 수 있습니다.
 
 ### 전략 1. '베이스(Base) 레지스트리' 유지 및 누적 전략 <br/>
 5000번과 5001번을 별개의 저장소로 보지 말고, 5000번을 '운영(Production)' 포트로 고정하고 5001번은 '반입용(Staging)' 포트로 사용하는 방식입니다. <br/>
