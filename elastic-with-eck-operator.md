@@ -440,8 +440,8 @@ spec:
 > ENOTFOUND artifacts.security.elastic.co: 폐쇄망이라 발생하는 업데이트 체크 실패 로그 (무시 가능 확인).
 
 # 8. Elasticsearch 계정 생성 및 관리
-> elastic 기본유저는 패스워드 변경 또는 계정 삭제가 불가능합니다. <br/>
-> * 생성
+> elastic 기본유저는 패스워드 변경 또는 계정 삭제가 불가능합니다.
+* 생성
 ```
 $ oc extract -n ocp-es secret/ocp-es-elastic-user --to=-
 $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XPOST "https://localhost:9200/_security/user/admin" \
@@ -451,11 +451,11 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XPOST "
     "full_name" : "Admin User"
   }'
 ```
-> * 삭제
+* 삭제
 ```
 $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XDELETE "https://localhost:9200/_security/user/admin"
 ```
-> * 조회
+* 조회
 ```
 $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XGET "https://localhost:9200/_security/user"
 ```
