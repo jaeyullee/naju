@@ -17,7 +17,7 @@ USER ignite
 ```
 > Root Group 권한 부여 방식 대신 non-root-v2 SCC를 해당 프로젝트에 부여하는 방법도 있습니다.
 
-|구분|GID 0 전략 (OpenShift 기본)|nonroot-v2 SCC 부여 (옵션)|
+|**구분**|**GID 0 전략 (OpenShift 기본)**|**nonroot-v2 SCC 부여 (옵션)**|
 |:---|:---|:---|
 |UID 할당|랜덤 (예: 1000670000)|고정 (예: 1000)|
 |보안 강도|🔒 최상 (Best)|🔓 보통 (OpenShift 기준 낮아짐)|
