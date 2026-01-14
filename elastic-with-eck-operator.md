@@ -316,7 +316,7 @@ metadata:
 spec:
   version: 9.2.0
   count: 2
-  image: ocp-registry.kscada.kdneri.com:5000/oss/kibana/kibana:9.2.0
+  image: ocp-registry.xxx.xxx.xxx:5000/oss/kibana/kibana:9.2.0
   elasticsearchRef:
     name: ocp
   config:
@@ -368,7 +368,7 @@ metadata:
   name: kibana
   namespace: ocp-es
 spec:
-  host: kibana-ocp-es.apps.kscada.kdneri.com
+  host: kibana-ocp-es.apps.xxx.xxx.xxx
   to:
     kind: Service
     name: kibana-kb-http
@@ -394,7 +394,7 @@ metadata:
 spec:
   version: 9.2.0
   count: 2
-  image: ocp-registry.kscada.kdneri.com:5000/oss/kibana/kibana:9.2.0
+  image: ocp-registry.xxx.xxx.xxx:5000/oss/kibana/kibana:9.2.0
   elasticsearchRef:
     name: ocp
   config:
