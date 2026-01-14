@@ -286,7 +286,7 @@ spec:
           secretName: ocp-es-secret
           key: username
         password:
-          secretName: eck-secret
+          secretName: ocp-es-secret
           key: password
     tls:
       insecureSkipVerify: true
