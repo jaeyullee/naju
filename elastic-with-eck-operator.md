@@ -305,7 +305,120 @@ $ oc apply -f clusterlogforwarder.yaml
 $ oc logs -f -n openshift-logging infra-logforwarder-instance-xxxxx -c collector
 ```
 
+# 7. Kibana 배포
+```
+$ vi kibana.yaml
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: kibana
+  namespace: ocp-es
+spec:
+  version: 9.2.0
+  count: 2
+  image: ocp-registry.kscada.kdneri.com:5000/oss/kibana/kibana:9.2.0
+  elasticsearchRef:
+    name: ocp
+  config:
+    server.maxPayload: 26214400
+    logging.root.level: info
+    i18n.locale: "ko-KR"
+    telemetry.enabled: false
+    telemetry.optIn: false
+    server.ssl.enabled: false
+    xpack.fleet.enabled: false
+    xpack.fleet.registryUrl: "http://127.0.0.1"
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  podTemplate:
+    spec:
+      tolerations:
+      - key: "role"
+        operator: "Equal"
+        value: "infra"
+        effect: "NoSchedule"
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  kibana.k8s.elastic.co/name: kibana
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: kibana
+        resources:
+          limits:
+            memory: 2Gi
+            cpu: 2
+          requests:
+            memory: 2Gi
+            cpu: 1
+```
+```
+$ vi kibana-route.yaml
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: kibana
+  namespace: ocp-es
+spec:
+  host: kibana-ocp-es.apps.kscada.kdneri.com
+  to:
+    kind: Service
+    name: kibana-kb-http
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+```
+```
+$ oc create -f kibana.yaml
+$ oc create -f kibana-route.yaml
+```
 
-
-
-
+# 7-1. kibana - elasticsearch 간 연동에 실패하는 경우 (인증 실패)
+```
+$ oc edit kibana kibana -n ocp-es
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: kibana
+  namespace: ocp-es
+spec:
+  version: 9.2.0
+  count: 2
+  image: ocp-registry.kscada.kdneri.com:5000/oss/kibana/kibana:9.2.0
+  elasticsearchRef:
+    name: ocp
+  config:
+    server.maxPayload: 26214400
+    logging.root.level: info
+    i18n.locale: "ko-KR"
+    telemetry.enabled: false
+    telemetry.optIn: false
+    server.ssl.enabled: false
+    xpack.fleet.enabled: false
+    xpack.fleet.registryUrl: "http://127.0.0.1"
+    elasticsearch.serviceAccountToken: "${MANUAL_TOKEN}"    ## 추가
+    elasticsearch.ssl.verificationMode: "none"              ## 추가
+...
+  podTemplate:
+    spec:
+...
+      containers:
+      - name: kibana
+...
+        env:                              ## 이하내용 추가
+        - name: MANUAL_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: kibana-manual-token
+              key: token
+```
