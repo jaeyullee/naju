@@ -385,6 +385,17 @@ $ oc create -f kibana-route.yaml
 
 # 7-1. kibana - elasticsearch 간 연동에 실패하는 경우 (인증 실패)
 ```
+$ oc extract -n ocp-es secret/ocp-es-elastic-user --to=-
+$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k \
+    -XPOST "https://localhost:9200/_security/service/elastic/kibana/credential/token/ocp-custom-token?pretty"
+```
+> 생성된 토큰 값 복!
+```
+$ oc create secret generic kibana-manual-token -n ocp-es \
+  --from-literal=token=[복사한_토큰_값] \
+  --dry-run=client -o yaml | oc apply -f -
+```
+```
 $ oc edit kibana kibana -n ocp-es
 apiVersion: kibana.k8s.elastic.co/v1
 kind: Kibana
@@ -422,3 +433,46 @@ spec:
               name: kibana-manual-token
               key: token
 ```
+
+# 7-2. kibana 정상 기동 확인
+> Kibana is now available: 서비스 정상 기동 완료. <br/>
+> plugins-service ... fleet is disabled: 불필요한 Fleet 기능 차단 확인. <br/>
+> ENOTFOUND artifacts.security.elastic.co: 폐쇄망이라 발생하는 업데이트 체크 실패 로그 (무시 가능 확인).
+
+# 8. Elasticsearch 계정 생성 및 관리
+> elastic 기본유저는 패스워드 변경 또는 계정 삭제가 불가능합니다. <br/>
+> * 생성
+```
+$ oc extract -n ocp-es secret/ocp-es-elastic-user --to=-
+$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XPOST "https://localhost:9200/_security/user/admin" \
+   -H "Content-Type: application/json" \
+   -d '{      "password" : "redhat1!",
+    "roles" : [ "superuser" ],
+    "full_name" : "Admin User"
+  }'
+```
+> * 삭제
+```
+$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XDELETE "https://localhost:9200/_security/user/admin"
+```
+> * 조회
+```
+$ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XGET "https://localhost:9200/_security/user"
+```
+
+# 9. kibana 대시보드 데이터뷰 생성
+> 1. Kibana 콘솔 로그인
+> 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Management > Stack Management
+> 3. 왼쪽메뉴 하단의 Kibana > Data Views
+> 4. Create data view
+> 5. Name : 원하는대로 / Index pattern : 오른쪽의 인덱스 목록보고 적절히 결정 / Timestamp field : @timestamp 입력 후 Save data view to Kibana
+
+# 10. kibana 대시보드 로그 조회
+> 1. Kibana 콘솔 로그인
+> 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Analytics > Discover
+> 3. 왼쪽 상단 Dava View 선택창에서 9. 에서 생성한 Data View 선택
+> 4. 기능 활용
+>    * 시간 범위 조절 (Time Picker): 오른쪽 상단의 시계 아이콘을 클릭하여 로그를 볼 시간 범위(예: Last 15 minutes, Last 24 hours)를 설정합니다. Vector가 실시간으로 로그를 쏘고 있다면 'Last 15 minutes'로 두고 [Refresh] 버튼 옆의 화살표를 눌러 **[Start auto-refresh]**를 켜두는 것이 좋습니다.
+>    * 필드 필터링 (Available Fields): 왼쪽 리스트에 log.level, message, host.name 등 Vector가 보낸 필드들이 보일 것입니다. 특정 필드 이름 옆의 [+] 아이콘을 누르면 우측 테이블에 해당 열이 추가되어 표 형태로 깔끔하게 볼 수 있습니다.
+>    * 검색 및 필터 (KQL): 상단 검색창에 log.level : "error" 라고 입력하면 에러 로그만 필터링됩니다. KQL(Kibana Query Language)은 자동 완성을 지원하므로 입력하기 편리합니다.
+>    * 로그 상세 보기: 리스트의 특정 행 왼쪽 화살표(>)를 누르면 해당 로그의 전체 JSON 내용과 모든 필드 값을 한눈에 확인할 수 있습니다.
