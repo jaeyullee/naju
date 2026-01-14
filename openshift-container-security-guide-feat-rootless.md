@@ -15,7 +15,8 @@ RUN chgrp -R 0 /opt/ignite/apache-ignite && \
 # 다시 ignite 유저로 전환 (또는 OCP 랜덤 유저 사용을 위해 생략)
 USER ignite
 ```
-> Root Group 권한 부여 방식 대신 non-root-v2 SCC를 해당 프로젝트에 부여하는 방법도 있습니다.
+> Root Group 권한 부여 방식 대신 non-root-v2 SCC를 해당 프로젝트에 부여하는 방법도 있습니다. <br/>
+> OCP 관리자 측면에서는 GID 사용이 유리하고, 스토리지 관리자(NFS) 측면에서는 SCC가 더 유리합니다.
 
 |**구분**|**GID 0 전략 (OpenShift 기본)**|**nonroot-v2 SCC 부여 (옵션)**|
 |:---|:---|:---|
