@@ -3,7 +3,8 @@
 # 1. Cluster Logging 오퍼레이터 및 ECK 오퍼레이터 설치
 > OpenShift 콘솔의 GUI 화면을 이용하여 Operator 설치
 
-# 2. elasticsearch 컨테이너 이미지 반입
+# 2. Elasticsearch
+## 2-1. elasticsearch 컨테이너 이미지 반입
 > ECK 오퍼레이터 버전에 따라 elasticsearch 이미지 버전 결정
 > nexus의 도커 레지스트리에 elasticsearch 이미지를 푸시할 경로는 ocp-operators-mirror/eck로 가정.
 ```
@@ -13,7 +14,7 @@ $ podman push ocp-registry.xxx.xxx.xxx:5000/ocp-operators-mirror/elasticsearch/e
 $ curl -u <id>:<pw> https://ocp-registry.xxx.xxx.xxx:5000/v2/_catalog
 ```
 
-# 3. elasticsearch 컨테이너 이미지 활용을 위한 미러링
+## 2-2. elasticsearch 컨테이너 이미지 활용을 위한 미러링
 ```
 $ vi itms-elastic.yaml
 apiVersion: config.openshift.io/v1
@@ -31,7 +32,7 @@ $ oc apply -f itms-elastic.yaml
 $ watch oc get node,mcp
 ```
 
-# 4. elasticsearch cluster 배포
+## 2-3. elasticsearch cluster 배포
 ```
 $ vi elastic-pvs.yaml
 apiVersion: v1
@@ -241,7 +242,7 @@ $ oc apply -f elastic-pvs.yaml
 $ oc apply -f elasticsearch.yaml
 ```
 
-# 5. Elasticsearch Cluster 상태 확인
+## 2-4. Elasticsearch Cluster 상태 확인
 ```
 $ oc get elasticsearch -n ocp-es
 $ PASSWORD=$(oc get secret ocp-es-elastic-user -n ocp-es -o go-template='{{.data.elastic | base64decode}}')
@@ -250,7 +251,8 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:$PASSWORD" -k "https
 $ oc logs -f ocp-es-node-1-0 -n ocp-es
 ```
 
-# 6. clusterLoggingForwarder 배포
+# 3. Collector
+## 3-1. clusterLoggingForwarder 배포포
 ```
 $ oc create sa logging-collector -n openshift-logging
 $ oc adm policy add-cluster-role-to-user logging-collector-logs-writer -z logging-collector -n openshift-logging
@@ -305,7 +307,8 @@ $ oc apply -f clusterlogforwarder.yaml
 $ oc logs -f -n openshift-logging infra-logforwarder-instance-xxxxx -c collector
 ```
 
-# 7. Kibana 배포
+# 4. Kibana
+## 4-1. kibana 배포
 ```
 $ vi kibana.yaml
 apiVersion: kibana.k8s.elastic.co/v1
@@ -383,7 +386,7 @@ $ oc create -f kibana.yaml
 $ oc create -f kibana-route.yaml
 ```
 
-# 7-1. kibana - elasticsearch 간 연동에 실패하는 경우 (인증 실패)
+## 4-2. kibana - elasticsearch 간 연동에 실패하는 경우 (인증 실패)
 ```
 $ oc extract -n ocp-es secret/ocp-es-elastic-user --to=-
 $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k \
@@ -434,12 +437,32 @@ spec:
               key: token
 ```
 
-# 7-2. kibana 정상 기동 확인
+## 4-3. kibana 정상 기동 확인
 > Kibana is now available: 서비스 정상 기동 완료. <br/>
 > plugins-service ... fleet is disabled: 불필요한 Fleet 기능 차단 확인. <br/>
 > ENOTFOUND artifacts.security.elastic.co: 폐쇄망이라 발생하는 업데이트 체크 실패 로그 (무시 가능 확인).
 
-# 8. Elasticsearch 계정 생성 및 관리
+
+## 4-4. kibana 대시보드 데이터뷰 생성
+> 1. Kibana 콘솔 로그인
+> 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Management > Stack Management
+> 3. 왼쪽메뉴 하단의 Kibana > Data Views
+> 4. Create data view
+> 5. Name : 원하는대로 / Index pattern : 오른쪽의 인덱스 목록보고 적절히 결정 / Timestamp field : @timestamp 입력 후 Save data view to Kibana
+
+## 4-5. kibana 대시보드 로그 조회
+> 1. Kibana 콘솔 로그인
+> 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Analytics > Discover
+> 3. 왼쪽 상단 Dava View 선택창에서 9. 에서 생성한 Data View 선택
+> 4. 기능 활용
+>    * 시간 범위 조절 (Time Picker): 오른쪽 상단의 시계 아이콘을 클릭하여 로그를 볼 시간 범위(예: Last 15 minutes, Last 24 hours)를 설정합니다. Vector가 실시간으로 로그를 쏘고 있다면 'Last 15 minutes'로 두고 [Refresh] 버튼 옆의 화살표를 눌러 **[Start auto-refresh]**를 켜두는 것이 좋습니다.
+>    * 필드 필터링 (Available Fields): 왼쪽 리스트에 log.level, message, host.name 등 Vector가 보낸 필드들이 보일 것입니다. 특정 필드 이름 옆의 [+] 아이콘을 누르면 우측 테이블에 해당 열이 추가되어 표 형태로 깔끔하게 볼 수 있습니다.
+>    * 검색 및 필터 (KQL): 상단 검색창에 log.level : "error" 라고 입력하면 에러 로그만 필터링됩니다. KQL(Kibana Query Language)은 자동 완성을 지원하므로 입력하기 편리합니다.
+>    * 로그 상세 보기: 리스트의 특정 행 왼쪽 화살표(>)를 누르면 해당 로그의 전체 JSON 내용과 모든 필드 값을 한눈에 확인할 수 있습니다.
+
+
+# 추가
+## 1) Elasticsearch 계정 생성 및 관리
 > elastic 기본유저는 패스워드 변경 또는 계정 삭제가 불가능합니다.
 * 생성
 ```
@@ -459,20 +482,3 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XDELETE
 ```
 $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XGET "https://localhost:9200/_security/user"
 ```
-
-# 9. kibana 대시보드 데이터뷰 생성
-> 1. Kibana 콘솔 로그인
-> 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Management > Stack Management
-> 3. 왼쪽메뉴 하단의 Kibana > Data Views
-> 4. Create data view
-> 5. Name : 원하는대로 / Index pattern : 오른쪽의 인덱스 목록보고 적절히 결정 / Timestamp field : @timestamp 입력 후 Save data view to Kibana
-
-# 10. kibana 대시보드 로그 조회
-> 1. Kibana 콘솔 로그인
-> 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Analytics > Discover
-> 3. 왼쪽 상단 Dava View 선택창에서 9. 에서 생성한 Data View 선택
-> 4. 기능 활용
->    * 시간 범위 조절 (Time Picker): 오른쪽 상단의 시계 아이콘을 클릭하여 로그를 볼 시간 범위(예: Last 15 minutes, Last 24 hours)를 설정합니다. Vector가 실시간으로 로그를 쏘고 있다면 'Last 15 minutes'로 두고 [Refresh] 버튼 옆의 화살표를 눌러 **[Start auto-refresh]**를 켜두는 것이 좋습니다.
->    * 필드 필터링 (Available Fields): 왼쪽 리스트에 log.level, message, host.name 등 Vector가 보낸 필드들이 보일 것입니다. 특정 필드 이름 옆의 [+] 아이콘을 누르면 우측 테이블에 해당 열이 추가되어 표 형태로 깔끔하게 볼 수 있습니다.
->    * 검색 및 필터 (KQL): 상단 검색창에 log.level : "error" 라고 입력하면 에러 로그만 필터링됩니다. KQL(Kibana Query Language)은 자동 완성을 지원하므로 입력하기 편리합니다.
->    * 로그 상세 보기: 리스트의 특정 행 왼쪽 화살표(>)를 누르면 해당 로그의 전체 JSON 내용과 모든 필드 값을 한눈에 확인할 수 있습니다.
