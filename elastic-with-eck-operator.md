@@ -507,4 +507,4 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XGET "h
 |&nbsp;|kibana_user|Kibana 메뉴 접속 및 대시보드 확인 가능|일반 분석가|
 |&nbsp;|monitoring_user|Kibana 내의 Stack Monitoring 메뉴 확인 가능|시스템 관제|
 <br/>
-> [[참고문서]]https://www.elastic.co/docs/api/doc/elasticsearch
+> [[참고문서]](https://www.elastic.co/docs/api/doc/elasticsearch)
