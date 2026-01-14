@@ -476,11 +476,20 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XPOST "
 ```
 > 유저 role 리스트 <br/>
 
-|**역할 이름**|**권한 범위**|**용도**|
-|:---|:---|:---|
-|cluster_admin|클러스터의 모든 관리 권한 (노드 설정, 스냅샷, 샤드 재배치 등)|인프라 운영자용|
-|cluster_monitor|클러스터 상태 조회 및 노드 통계 확인 (수정 불가)|모니터링 대시보드 연결용|
-|security_admin|사용자 생성, 삭제, 권한 부여 등 보안 관련 모든 설정|보안 담당자용|
+|**역할구분**||**역할 이름**|**권한 범위**|**용도**|
+|:---|:---|:---|:---|
+|운영/관리|cluster_admin|클러스터의 모든 관리 권한 (노드 설정, 스냅샷, 샤드 재배치 등)|인프라 운영자용|
+||cluster_monitor|클러스터 상태 조회 및 노드 통계 확인 (수정 불가)|모니터링 대시보드 연결용|
+||security_admin|사용자 생성, 삭제, 권한 부여 등 보안 관련 모든 설정|보안 담당자용|
+|데이터처리||all|모든 인덱스에 대해 모든 작업(CRUD) 가능|데이터 총괄 관리자|
+|||editor|인덱스 생성/삭제 및 데이터 읽기/쓰기 가능|개발자 또는 DBA|
+|||viewer|데이터 읽기(Search, Get)만 가능 (수정 불가)|일반 사용자 (로그 조회용)|
+|||read|특정 인덱스의 데이터 읽기 권한|가장 좁은 범위의 조회 전용|
+|Kibana 전용||역할 이름|권한 범위|용도|
+|||kibana_admin|Kibana의 모든 기능 사용 (대시보드 생성, 설정 변경 등)|Kibana 관리자|
+|||kibana_user|Kibana 메뉴 접속 및 대시보드 확인 가능|일반 분석가|
+|||monitoring_user|Kibana 내의 Stack Monitoring 메뉴 확인 가능|시스템 관제|
+
 * 삭제
 ```
 $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XDELETE "https://localhost:9200/_security/user/admin"
