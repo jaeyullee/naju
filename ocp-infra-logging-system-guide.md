@@ -415,7 +415,7 @@ spec:
     - drop:
         - test:
             - field: .kubernetes.namespace_name
-              notMatches: ^(ocp-es|ocp-rhbk)$
+              notMatches: ^ocp-.+$
       name: keep-infra-apps-only
       type: drop
   inputs:
