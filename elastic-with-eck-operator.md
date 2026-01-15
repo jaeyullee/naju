@@ -386,9 +386,6 @@ spec:
 > plugins-service ... fleet is disabled: 불필요한 Fleet 기능 차단 확인. <br/>
 > ENOTFOUND artifacts.security.elastic.co: 폐쇄망이라 발생하는 업데이트 체크 실패 로그 (무시 가능 확인).
 
-## 3-4. index 템플릿 생성 및 보관주기 설정
-
-
 # 4. Collector
 ## 4-1. clusterLoggingForwarder 배포
 ```
@@ -403,7 +400,7 @@ $ ELASTIC_PASSWORD=$(oc get secret ocp-es-elastic-user -n ocp-es -o jsonpath='{.
 $ oc create secret generic ocp-es-secret --from-literal=username=elastic --from-literal=password=$ELASTIC_PASSWORD -n openshift-logging
 ```
 > 아래 clusterlogforwarder는 infrastructure 로그만 전송하게 설정했음.
-> application 으로 분류되지만 인프라 성격의 operator 로그들 전송 및 audit 로그 전송 설정 필요함.
+> application 으로 분류되지만 인프라 성격의 operator(예: servicemesh 등) 로그들 전송 및 audit 로그 전송 설정 필요함.
 ```
 $ vi clusterlogforwarder.yaml
 apiVersion: observability.openshift.io/v1
@@ -478,7 +475,6 @@ PUT %3Cinfra-logs-%7Bnow%2Fd%7D-000001%3E
   }
 }
 ```
-
 > 기타 로그 타입들에 대한 설정은 생략합니다.
 
 ## 5-2. 인덱스 정책 생성
