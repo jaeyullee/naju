@@ -568,3 +568,4 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XGET "h
 > 5. defaultRoute 입력칸 값을 아래와같 변경
 >    /app/home   >>>> /app/discover
 > 6. 하단 Save changes 선택
+> 7. 로그아웃&로그인 하여 Discover 화면으로 바로 redirect 되는지 확인
