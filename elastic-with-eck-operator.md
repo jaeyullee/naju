@@ -251,64 +251,8 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:$PASSWORD" -k "https
 $ oc logs -f ocp-es-node-1-0 -n ocp-es
 ```
 
-# 3. Collector
-## 3-1. clusterLoggingForwarder 배포포
-```
-$ oc create sa logging-collector -n openshift-logging
-$ oc adm policy add-cluster-role-to-user logging-collector-logs-writer -z logging-collector -n openshift-logging
-$ oc adm policy add-cluster-role-to-user collect-application-logs -z logging-collector -n openshift-logging
-$ oc adm policy add-cluster-role-to-user collect-infrastructure-logs -z logging-collector -n openshift-logging
-$ oc adm policy add-cluster-role-to-user collect-audit-logs -z logging-collector -n openshift-logging
-```
-```
-$ ELASTIC_PASSWORD=$(oc get secret ocp-es-elastic-user -n ocp-es -o jsonpath='{.data.elastic}' |base64 -d)
-$ oc create secret generic ocp-es-secret --from-literal=username=elastic --from-literal=password=$ELASTIC_PASSWORD -n openshift-logging
-```
-> 아래 clusterlogforwarder는 infrastructure 로그만 전송하게 설정했음.
-> application 으로 분류되지만 인프라 성격의 operator 로그들 전송 및 audit 로그 전송 설정 필요함.
-```
-$ vi clusterlogforwarder.yaml
-apiVersion: observability.openshift.io/v1
-kind: ClusterLogForwarder
-metadata:
-  name: infra-logforwarder-instance
-  namespace: openshift-logging
-spec:
-  collector:
-    tolerations:
-    - operator: Exists
-  serviceAccount:
-    name: logging-collector
-  outputs:
-  - name: eck-elasticsearch
-    type: elasticsearch
-    elasticsearch:
-      url: https://ocp-es-http.ocp-es.svc:9200
-      index: "infra-logs"
-      version: 8  # 8.x 버전 이상은 무조건 8로 통일
-      authentication:
-        username:
-          secretName: ocp-es-secret
-          key: username
-        password:
-          secretName: ocp-es-secret
-          key: password
-    tls:
-      insecureSkipVerify: true
-  pipelines:
-  - name: infra-logs-to-eck
-    inputRefs:
-    - infrastructure
-    outputRefs:
-    - eck-elasticsearch
-```
-```
-$ oc apply -f clusterlogforwarder.yaml
-$ oc logs -f -n openshift-logging infra-logforwarder-instance-xxxxx -c collector
-```
-
-# 4. Kibana
-## 4-1. kibana 배포
+# 3. Kibana
+## 3-1. kibana 배포
 ```
 $ vi kibana.yaml
 apiVersion: kibana.k8s.elastic.co/v1
@@ -386,7 +330,7 @@ $ oc create -f kibana.yaml
 $ oc create -f kibana-route.yaml
 ```
 
-## 4-2. kibana - elasticsearch 간 연동에 실패하는 경우 (인증 실패)
+## 3-2. kibana - elasticsearch 간 연동에 실패하는 경우 (인증 실패)
 ```
 $ oc extract -n ocp-es secret/ocp-es-elastic-user --to=-
 $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k \
@@ -437,20 +381,133 @@ spec:
               key: token
 ```
 
-## 4-3. kibana 정상 기동 확인
+## 3-3. kibana 정상 기동 확인
 > Kibana is now available: 서비스 정상 기동 완료. <br/>
 > plugins-service ... fleet is disabled: 불필요한 Fleet 기능 차단 확인. <br/>
 > ENOTFOUND artifacts.security.elastic.co: 폐쇄망이라 발생하는 업데이트 체크 실패 로그 (무시 가능 확인).
 
+## 3-4. index 템플릿 생성 및 보관주기 설정
 
-## 4-4. kibana 대시보드 데이터뷰 생성
+
+# 4. Collector
+## 4-1. clusterLoggingForwarder 배포
+```
+$ oc create sa logging-collector -n openshift-logging
+$ oc adm policy add-cluster-role-to-user logging-collector-logs-writer -z logging-collector -n openshift-logging
+$ oc adm policy add-cluster-role-to-user collect-application-logs -z logging-collector -n openshift-logging
+$ oc adm policy add-cluster-role-to-user collect-infrastructure-logs -z logging-collector -n openshift-logging
+$ oc adm policy add-cluster-role-to-user collect-audit-logs -z logging-collector -n openshift-logging
+```
+```
+$ ELASTIC_PASSWORD=$(oc get secret ocp-es-elastic-user -n ocp-es -o jsonpath='{.data.elastic}' |base64 -d)
+$ oc create secret generic ocp-es-secret --from-literal=username=elastic --from-literal=password=$ELASTIC_PASSWORD -n openshift-logging
+```
+> 아래 clusterlogforwarder는 infrastructure 로그만 전송하게 설정했음.
+> application 으로 분류되지만 인프라 성격의 operator 로그들 전송 및 audit 로그 전송 설정 필요함.
+```
+$ vi clusterlogforwarder.yaml
+apiVersion: observability.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: infra-logforwarder-instance
+  namespace: openshift-logging
+spec:
+  collector:
+    tolerations:
+    - operator: Exists
+  serviceAccount:
+    name: logging-collector
+  outputs:
+  - name: eck-elasticsearch
+    type: elasticsearch
+    elasticsearch:
+      url: https://ocp-es-http.ocp-es.svc:9200
+      index: "infra-logs"
+      version: 8  # 8.x 버전 이상은 무조건 8로 통일
+      authentication:
+        username:
+          secretName: ocp-es-secret
+          key: username
+        password:
+          secretName: ocp-es-secret
+          key: password
+    tls:
+      insecureSkipVerify: true
+  pipelines:
+  - name: infra-logs-to-eck
+    inputRefs:
+    - infrastructure
+    outputRefs:
+    - eck-elasticsearch
+```
+```
+$ oc apply -f clusterlogforwarder.yaml
+$ oc logs -f -n openshift-logging infra-logforwarder-instance-xxxxx -c collector
+```
+
+# 5. 로그 인덱스 설정 및 조회
+## 5-1. 인덱스 템플릿 생성
 > 1. Kibana 콘솔 로그인
 > 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Management > Stack Management
-> 3. 왼쪽메뉴 하단의 Kibana > Data Views
+> 3. 왼쪽 Data > Index Management
+> 4. Index Templates > Create template
+> 5. Name : infra-logs-template / index patterns : infra-logs 입력 후 Next
+> 6. Next
+> 7. Index settings에 아래처럼 입력 후 Next
+```
+{
+  "index": {
+    "lifecycle": {
+      "name": "infra-logs-policy",
+      "rollover_alias": "infra-logs"
+    },
+    "mode": "standard"
+  }
+}
+```
+> 8. 끝까지 Next 후 Save template
+> 9. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Management > Dev Tools
+> 10. Shell 에서 아래처럼 입력 후 Ctrl+Enter 하여 {"acknowledged": true, ...} 결과 확인
+```
+PUT %3Cinfra-logs-%7Bnow%2Fd%7D-000001%3E
+{
+  "aliases": {
+    "infra-logs": {
+      "is_write_index": true
+    }
+  }
+}
+```
+
+> 기타 로그 타입들에 대한 설정은 생략합니다.
+
+## 5-2. 인덱스 정책 생성
+> 1. Kibana 콘솔 로그인
+> 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Management > Stack Management
+> 3. 왼쪽 Data > Index Lifecycle Policies
+> 4. Create policy
+> 5. Hot phase > Advanced settings 선택하여 아래와같이 설정
+>    * Rollover > Use recommended defaults 비활성화
+>        * Maximum primary shard size : 50 gigabytes (변경)
+>        * Maximum age : 1 days (변경)
+> 6. Warm phase 활성화 > Advanced settings 선택하여 아래와같이 설정
+>    * Shirink > Shirink index 활성화
+>    * Force merge > Force merge data 활성화
+>        * Number of segments : 1 (설정)
+> 7. Warm phase 오른쪽에 (Keep data in this phase forever ♾️🗑️) 라고 되어있는 부분에서 🗑️ 를 선택하여 (Delete data after this phase ♾️🗑️) 로 변경
+> 8. Delete phase 아래와 같이 설정
+>    * Move data into phase when : 14 days
+
+> ❗위 값은 기본적인 운영상황에서 추천하는 설정값입니다. elasticsearch에 할당된 로그저장소 크기 및 수집로그양에 따라 적절한 튜닝이 필요합니다.
+
+## 5-3. kibana 대시보드 데이터뷰 생성
+> 1. Kibana 콘솔 로그인
+> 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Management > Stack Management
+> 3. 왼쪽메뉴 Kibana > Data Views
 > 4. Create data view
 > 5. Name : 원하는대로 / Index pattern : 오른쪽의 인덱스 목록보고 적절히 결정 / Timestamp field : @timestamp 입력 후 Save data view to Kibana
 
-## 4-5. kibana 대시보드 로그 조회
+## 5-4. kibana 대시보드 로그 조회
 > 1. Kibana 콘솔 로그인
 > 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Analytics > Discover
 > 3. 왼쪽 상단 Dava View 선택창에서 9. 에서 생성한 Data View 선택
