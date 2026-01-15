@@ -482,9 +482,7 @@ PUT %3Cinfra-logs-%7Bnow%2Fd%7D-000001%3E
 > 기타 로그 타입들에 대한 설정은 생략합니다.
 
 ## 5-2. 인덱스 정책 생성
-> 1. Kibana 콘솔 로그인
-> 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Management > Stack Management
-> 3. 왼쪽 Data > Index Lifecycle Policies
+>  Data > Index Lifecycle Policies
 > 4. Create policy
 > 5. Hot phase > Advanced settings 선택하여 아래와같이 설정
 >    * Rollover > Use recommended defaults 비활성화
@@ -519,7 +517,7 @@ PUT %3Cinfra-logs-%7Bnow%2Fd%7D-000001%3E
 
 
 # 추가
-## 1) Elasticsearch 계정 생성 및 관리
+## A. Elasticsearch 계정 생성 및 관리
 > elastic 기본유저는 패스워드 변경 또는 계정 삭제가 불가능합니다.
 * 생성
 ```
@@ -565,3 +563,12 @@ $ oc exec -it ocp-es-node-1-0 -n ocp-es -- curl -u "elastic:[ES_PW]" -k -XGET "h
 |&nbsp;|monitoring_user|Kibana 내의 Stack Monitoring 메뉴 확인 가능|시스템 관제|
 
 > [[참고문서]](https://www.elastic.co/docs/api/doc/elasticsearch)
+
+## B. Kibana 홈화면을 로그 조회화면(Discover)로 변경
+> 1. Kibana 콘솔 로그인
+> 2. 왼쪽 사이드바 메뉴(줄 3개 아이콘) > Management > Stack Management
+> 3. 왼쪽 Kibana > Advanced Settings
+> 4. 상단 검색창에 defaultRoute 입력
+> 5. defaultRoute 입력칸 값을 아래와같 변경
+>    /app/home   >>>> /app/discover
+> 6. 하단 Save changes 선택
