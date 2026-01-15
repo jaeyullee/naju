@@ -437,6 +437,57 @@ spec:
     outputRefs:
     - eck-elasticsearch
 ```
+> infra성 app로그 전달 테스트 중
+```
+apiVersion: observability.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: infra-logforwarder-instance
+  namespace: openshift-logging
+spec:
+  collector:
+    tolerations:
+      - operator: Exists
+  filters:
+    - drop:
+        - test:
+            - field: .kubernetes.namespace_name
+              notMatches: ^(ocp-es|ocp-rhbk)$
+      name: keep-infra-apps-only
+      type: drop
+  inputs:
+    - application: {}
+      name: infra-app-ns
+      type: application
+  managementState: Managed
+  outputs:
+    - elasticsearch:
+        authentication:
+          password:
+            key: password
+            secretName: ocp-es-secret
+          username:
+            key: username
+            secretName: ocp-es-secret
+        index: infra-logs
+        url: 'https://ocp-es-http.ocp-es.svc:9200'
+        version: 8
+      name: eck-elasticsearch
+      tls:
+        insecureSkipVerify: true
+      type: elasticsearch
+  pipelines:
+    - filterRefs:
+        - keep-infra-apps-only
+      inputRefs:
+        - infrastructure
+        - infra-app-ns
+      name: infra-logs-to-eck
+      outputRefs:
+        - eck-elasticsearch
+  serviceAccount:
+    name: logging-collector
+```
 ```
 $ oc apply -f clusterlogforwarder.yaml
 $ oc logs -f -n openshift-logging infra-logforwarder-instance-xxxxx -c collector
