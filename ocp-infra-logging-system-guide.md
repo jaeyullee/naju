@@ -400,7 +400,7 @@ $ ELASTIC_PASSWORD=$(oc get secret ocp-es-elastic-user -n ocp-es -o jsonpath='{.
 $ oc create secret generic ocp-es-secret --from-literal=username=elastic --from-literal=password=$ELASTIC_PASSWORD -n openshift-logging
 ```
 > 모든 로그를 infra-logs 라는 인덱스로 전달하도록 설정 함. <br/>
-> .spec.filters[].drop[].test[].notpatches 에 전달할 네임스페이스 입력 필요
+> .spec.filters[].drop[].test[].notpatches 에 ^ocp-.+$ 정규표현식으로 넣었기 때문에 일반 네임스페이스를 ocp-xxx로 만들지 못하도록 관리 필요.
 ```
 apiVersion: observability.openshift.io/v1
 kind: ClusterLogForwarder
