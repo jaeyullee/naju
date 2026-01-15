@@ -399,45 +399,8 @@ $ oc adm policy add-cluster-role-to-user collect-audit-logs -z logging-collector
 $ ELASTIC_PASSWORD=$(oc get secret ocp-es-elastic-user -n ocp-es -o jsonpath='{.data.elastic}' |base64 -d)
 $ oc create secret generic ocp-es-secret --from-literal=username=elastic --from-literal=password=$ELASTIC_PASSWORD -n openshift-logging
 ```
-> 아래 clusterlogforwarder는 infrastructure 로그만 전송하게 설정했음.
-> application 으로 분류되지만 인프라 성격의 operator(예: servicemesh 등) 로그들 전송 및 audit 로그 전송 설정 필요함.
-```
-$ vi clusterlogforwarder.yaml
-apiVersion: observability.openshift.io/v1
-kind: ClusterLogForwarder
-metadata:
-  name: infra-logforwarder-instance
-  namespace: openshift-logging
-spec:
-  collector:
-    tolerations:
-    - operator: Exists
-  serviceAccount:
-    name: logging-collector
-  outputs:
-  - name: eck-elasticsearch
-    type: elasticsearch
-    elasticsearch:
-      url: https://ocp-es-http.ocp-es.svc:9200
-      index: "infra-logs"
-      version: 8  # 8.x 버전 이상은 무조건 8로 통일
-      authentication:
-        username:
-          secretName: ocp-es-secret
-          key: username
-        password:
-          secretName: ocp-es-secret
-          key: password
-    tls:
-      insecureSkipVerify: true
-  pipelines:
-  - name: infra-logs-to-eck
-    inputRefs:
-    - infrastructure
-    outputRefs:
-    - eck-elasticsearch
-```
-> infra성 app로그 전달 테스트 중
+> 모든 로그를 infra-logs 라는 인덱스로 전달하도록 설정 함. <br/>
+> .spec.filters[].drop[].test[].notpatches 에 전달할 네임스페이스 입력 필요
 ```
 apiVersion: observability.openshift.io/v1
 kind: ClusterLogForwarder
