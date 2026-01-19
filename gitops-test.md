@@ -1,4 +1,5 @@
 1. gitops component 기본 리소스
+
 |워크로드|CPU 요청|CPU 제한|메모리 요청|메모리 제한|
 |:---|:---|:---|:---|:---|
 |argocd-application-controller|1|2|1024Mi|2048Mi|
