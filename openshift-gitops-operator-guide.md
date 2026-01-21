@@ -45,7 +45,8 @@ openshift-gitops   15m
 # 4. ArgoCD 인스턴스 설정 변경
 > GitOps 관련 파드가 Infra 노드에 배포되도록 설정 및 클러스터 전체에 배포할수 있도록 권한 부여  
 ```
-$ oc patch argocd openshift-gitops -n openshift-gitops --type=merge -p '
+$ oc get argocd -n openshift-gitops
+$ oc patch argocd ocp-gitops-cluster -n openshift-gitops --type=merge -p '
 {
   "spec": {
     "nodePlacement": {
@@ -64,8 +65,9 @@ $ oc patch argocd openshift-gitops -n openshift-gitops --type=merge -p '
   }
 }'
 ```
+> ❗<client_secret> 와 <domain> 부분 수정하고 작업하기  
 ```
-$ oc patch argocd openshift-gitops -n openshift-gitops --type=merge -p "
+$ oc patch argocd ocp-gitops-cluster -n openshift-gitops --type=merge -p "
 spec:
   oidcConfig: |
     name: Keycloak
