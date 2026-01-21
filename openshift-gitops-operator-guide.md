@@ -20,7 +20,12 @@ NAME               AGE
 openshift-gitops   15m
 ```
 
-# 3. ArgoCD 인스턴스 배포
+# 3. RHBK 설정
+> group 생성 <br/>
+> user 생성 > password 설정 > group 할당 <br/>
+> client 생성 > client authentication 활성화 > Direct access grants 활성화 > root url 등 설정 > client scope - group membership 추가
+
+# 4. ArgoCD 인스턴스 설저 변경
 > GitOps 관련 파드가 Infra 노드에 배포되도록 설정 및 클러스터 전체에 배포할수 있도록 권한 부여
 ```
 $ oc create secret generic argocd-keycloak-secret \
@@ -112,12 +117,12 @@ $ oc get argocd openshift-gitops -n openshift-gitops -o yaml | grep -A 20 oidcCo
 > ❗참고 : 동일한 네임스페이스에 두 개의 Argo CD CR을 생성할 수 없습니다.
 
 
-# 4. ArgoCD 인스턴스가 배포된 프로젝트 외 다른 프로젝트에 리소스 배포하기 위해 다른 프로젝트에 레이블 설정(필수)
+# 5. ArgoCD 인스턴스가 배포된 프로젝트 외 다른 프로젝트에 리소스 배포하기 위해 다른 프로젝트에 레이블 설정(필수)
 ```
 $ oc label namespace <target_namespace> argocd.argoproj.io/managed-by=openshift-gitops
 ```
 
-# 5. ArgoCD 알람
+# 6. ArgoCD 알람
 > Argo CD 알림을 사용하면 Argo CD 인스턴스에서 이벤트가 발생할 때 외부 서비스에 알림을 보낼 수 있습니다. 예를 들어 동기화 작업이 실패하면 Slack 또는 이메일에 알림을 보낼 수 있습니다. 기본적으로 알림은 Argo CD 인스턴스에서 비활성화되어 있습니다.
 > 참고 1 : https://docs.redhat.com/ko/documentation/red_hat_openshift_gitops/1.16/html-single/argo_cd_instance/index#gitops-argo-cd-notification_argo-cd-cr-component-properties
 > 참고 2 : https://docs.redhat.com/ko/documentation/red_hat_openshift_gitops/1.16/html-single/argo_cd_instance/index#notifications-configuration-custom-resource-properties_argo-cd-cr-component-properties
