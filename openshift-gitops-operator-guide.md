@@ -65,7 +65,7 @@ $ oc patch argocd ocp-gitops-cluster -n openshift-gitops --type=merge -p '
   }
 }'
 ```
-> ❗<client_secret> 와 <domain> 부분 수정하고 작업하기  
+> ❗<client_secret> 와 \<domain\> 부분 수정하고 작업하기  
 ```
 $ oc patch argocd ocp-gitops-cluster -n openshift-gitops --type=merge -p "
 spec:
