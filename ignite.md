@@ -285,6 +285,12 @@ $ oc create -f ignite-sts.yaml
 ```
 $ oc exec -it ignite-node-0 -n kscada-main-mw-ignite -- ignite3 cluster init   --url=http://127.0.0.1:10300   --name=kscada-cluster   --metastorage-group=ignite-node-0,ignite-node-1,ignite-node-2
 ```
+> 버전에 따라 다를 수 있으므로, ignite3 cluster init --help 를 이용해 flags를 미리 확인해야 합니다.
+> 안될 경우 포트 살아있는지 확인하는 방법
+```
+$ oc exec -it ignite-node-0 -n ignite-test -- grep "283C" /proc/net/tcp
+$ oc exec ignite-node-0 -n ignite-test -- perl -e 'use IO::Socket::INET; $s = IO::Socket::INET->new(PeerAddr => "127.0.0.1", PeerPort => 10300, Proto => "tcp", Timeout => 2); if($s) { print "SUCCESS: Port 10300 is responding\n"; } else { print "FAILED: $!\n"; }'
+```
 
 # 5. Ignite 클러스터 상태 점검
 ```
