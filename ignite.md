@@ -110,12 +110,13 @@ data:
     ignite {
       network {
         port: 3344
+        listenAddresses: ["0.0.0.0"]
         nodeFinder {
           # 3개 노드의 주소를 모두 적어줍니다.
           netClusterNodes: [
-            "ignite-node-0.ignite-headless.kscada-main-mw-ignite.svc.cluster.local:3344",
-            "ignite-node-1.ignite-headless.kscada-main-mw-ignite.svc.cluster.local:3344",
-            "ignite-node-2.ignite-headless.kscada-main-mw-ignite.svc.cluster.local:3344"
+            "ignite-node-0.ignite-headless:3344",
+            "ignite-node-1.ignite-headless:3344",
+            "ignite-node-2.ignite-headless:3344"
           ]
         }
       }
@@ -185,6 +186,15 @@ spec:
         app: ignite-node
     spec:
       terminationGracePeriodSeconds: 60
+      initContainers:
+        - name: init-config
+          image: 'nexus.kscada.kdneri.com:5002/app/ignite:3.1.3'
+          command: ['sh', '-c', 'mkdir -p /opt/ignite/custom && cp /tmp/config-map/* /opt/ignite/custom/']
+          volumeMounts:
+            - name: ignite-config-source
+              mountPath: /tmp/config-map
+            - name: ignite-custom-vol
+              mountPath: /opt/ignite/custom
       containers:
         - name: ignite
           image: 'quay.xxx.xxx.xxx:5000/app/ignite:3.1.0'
@@ -192,6 +202,8 @@ spec:
           args:
             - '--node-name'
             - $(POD_NAME)
+            - "--config-path"
+            - "/opt/ignite/custom/ignite-config.conf"
           ports:
             - name: cluster
               containerPort: 3344
@@ -210,6 +222,9 @@ spec:
               cpu: '8'
               memory: 32Gi
           env:
+            - name: IGNITE3_EXTRA_JVM_ARGS
+              value: >-
+                -Djava.net.preferIPv4Stack=true
             - name: POD_NAME
               valueFrom:
                 fieldRef:
@@ -225,16 +240,17 @@ spec:
               value: |
                 -XX:+UseG1GC -Xms10g -Xmx10g -XX:MaxGCPauseMillis=100 -XX:InitiatingHeapOccupancyPercent=45 -XX:G1HeapRegionSize=16M -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=30 -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:MaxDirectMemorySize=4G -Xlog:gc*:file=/opt/ignite/work/gc.log:time,level -Dignite.system.criticalWorkers.maxAllowedLagMillis=20000 -Dignite.network.connectTimeout=30000 -Dignite.network.idleTimeout=60000
           volumeMounts:
-            - name: ignite-config
-              mountPath: /opt/ignite/etc/ignite-config.conf
+            - name: ignite-custom-vol
+              mountPath: /opt/ignite/custom
               subPath: ignite-config.conf
             - name: data
               mountPath: /opt/ignite/work
       volumes:
-        - name: ignite-config
+        - name: ignite-config-source
           configMap:
             name: ignite-config
-            defaultMode: 420
+        - name: ignite-custom-vol
+          emptyDir: {}
   volumeClaimTemplates:
     - kind: PersistentVolumeClaim
       apiVersion: v1
@@ -245,7 +261,7 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 10Gi
+            storage: 100Gi
         storageClassName: ''
         volumeMode: Filesystem
 ```
@@ -267,9 +283,7 @@ $ oc create -f ignite-sts.yaml
 
 # 4. Ignite 클러스터 초기화
 ```
-$ oc exec -it ignite-node-0 -n kscada-mw-ignite -- /opt/ignite/apache-ignite/bin/ignite3 cluster init \
-    --cluster-name=my-cluster \
-    --meta-storage-node=ignite-node-0,ignite-node-1,ignite-node-2
+$ oc exec -it ignite-node-0 -n kscada-main-mw-ignite -- ignite3 cluster init   --url=http://127.0.0.1:10300   --name=kscada-cluster   --metastorage-group=ignite-node-0,ignite-node-1,ignite-node-2
 ```
 
 # 5. Ignite 클러스터 상태 점검
