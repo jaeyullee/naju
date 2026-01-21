@@ -74,7 +74,7 @@ spec:
     issuer: https://sso.kscada.kdneri.com/realms/ocp-kdneri
     clientID: gitops-kdneri-client
     clientSecret: <client_secret>
-    requestedScopes: [\"openid\", \"profile\", \"email\", \"gitops-groups\"]
+    requestedScopes: [\"openid\", \"profile\", \"email\"]
     logoutUrl: https://sso.kscada.<domain>/realms/ocp-kdneri/protocol/openid-connect/logout?id_token_hint={{token}}&post_logout_redirect_uri={{logoutRedirectURL}}
     rootCA: |
       -----BEGIN CERTIFICATE-----
