@@ -1,22 +1,53 @@
 > 고객이 AS-IS 에서 테스트 중인 내용 기반으로 수정하여 작성하였습니다.
 
 # 1. Ignite 이미지 재빌드
-> OCP에서는 파드 배포시 해당 네임스페이스에 할당된 범위의 임의의 사용자 ID (ex. 1000580000)를 할당하기 때문에 파일시스템 접근권한 에러가 발생합니다.  <br/>
-> 이를 해결하기 위해 root(0) 그룹 ID 권한을 부여하는 방안을 권장합니다. [[참고]](https://docs.redhat.com/ko/documentation/openshift_container_platform/4.20/html/images/creating-images#use-uid_create-images)
+> OCP에서는 파드 배포시 해당 네임스페이스에 할당된 범위의 임의의 사용자 ID (ex. 1000580000)를 할당하기 때문에 파일시스템 접근권한 에러가 발생합니다.  
+> 이를 해결하기 위해 root(0) 그룹 ID 권한을 부여하는 방안을 권장합니다. [[참고]](https://docs.redhat.com/ko/documentation/openshift_container_platform/4.20/html/images/creating-images#use-uid_create-images)  
 ```
 $ vi Dockerfile
+# 1. Apache Ignite 3.1.0 공식 이미지를 베이스로 사용
 FROM apacheignite/ignite:3.1.0
+
+# 2. 루트 권한으로 전환하여 사용자 생성 및 시스템 설정 수행
 USER root
+
+# 3. ignite 사용자 생성 및 디렉토리 권한 설정
+# -u 1000: 특정 UID 부여
+# -m: 홈 디렉토리 생성
+# chgrp -R 0: OpenShift의 가이드에 따라 그룹을 root(0)로 설정 (보안 정책 대응)
+# chmod -R g=u: 소유자 권한을 그룹 권한과 동일하게 맞춤 (임의의 UID로 실행되어도 쓰기 가능하도록 함)
 RUN useradd -u 1000 -m -s /bin/bash ignite && \
     chgrp -R 0 /opt/ignite && \
-    chmod -R g=u /opt/ignite && \
-    chown -R ignite:0 /opt/ignite
+    chmod -R g=u /opt/ignite /opt/ignite3cli && \
+    chown -R ignite:0 /opt/ignite /opt/ignite3cli
+
+# 4. 어느 경로에서든 ignite3 CLI를 바로 실행할 수 있도록 심볼릭 링크 생성
+RUN ln -s /opt/ignite3cli/bin/ignite3 /usr/local/bin/ignite3
+
+# 5. [핵심] HOME 환경 변수 설정
+# ignite3 CLI는 실행 시 $HOME/.config/ignitecli 경로에 설정파일을 저장하려 함
+# OpenShift에서 기본 HOME이 / 로 잡혀 발생하는 'Permission Denied' 에러를 방지하기 위해 
+# 쓰기 권한이 확실한 PV 마운트 경로(/opt/ignite/work)로 지정
+ENV HOME=/opt/ignite/work
+
+# 6. CLI 실행 파일 경로를 시스템 PATH에 추가
+ENV PATH="${PATH}:/opt/ignite3cli/bin"
+
+# 7. [핵심] 모든 Java 프로세스(CLI 포함)에 적용될 전역 옵션
+# --add-opens: Java 11 이상의 모듈 시스템에서 jline 라이브러리가 내부 API에 접근할 수 있도록 허용
+# (어제 발생했던 'Error occurred during command execution' 및 JLine 리플렉션 경고 해결책)
+ENV JDK_JAVA_OPTIONS="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED"
+
+# 8. 최종 실행 사용자를 ignite로 전환 (보안을 위해 root 실행 방지)
 USER ignite
+
+# 9. 작업 디렉토리를 PV가 마운트되는 work 폴더로 설정
+WORKDIR /opt/ignite/work
 ```
 ```
-$ podman build -t my-ignite:3.1.0 .
-$ podman run --rm -it -u 12223 my-ignite:3.1.0
-$ podman tag my-ignite:3.1.0 quay.xxx.xxx.xxx/app/ignite:3.1.0
+$ podman build -t ignite-gid:3.1.0 .
+$ podman run --rm -it -u 12223 ignite-gid:3.1.0
+$ podman tag ignite-gid:3.1.0 quay.xxx.xxx.xxx/app/ignite-gid:3.1.0
 $ podman push quay.xxx.xxx.xxx/app/ignite:3.1.0
 ```
 
