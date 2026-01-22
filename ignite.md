@@ -326,7 +326,7 @@ $ oc exec ignite-node-0 -n ignite-test -- perl -e 'use IO::Socket::INET; $s = IO
 # 5. Ignite 클러스터 상태 점검
 ```
 $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
-  /opt/ignite/apache-ignite/bin/ignite3 cluster status
+  ignite3 cluster status
 ```
 > Cluster status: <br/>
 >   Name: my-cluster        <-- 아까 init 할 때 지은 이름 <br/>
@@ -334,7 +334,7 @@ $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
 >   Health: HEALTHY         <-- HEALTHY 여야 함
 ```
 $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
-  /opt/ignite/apache-ignite/bin/ignite3 cluster topology logical
+  ignite3 cluster topology logical
 ```
 > Logical topology: <br/>
 >   ignite-node-0 (id: ... , address: 10.128.x.x:3344) <br/>
@@ -344,15 +344,7 @@ $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
 > Total: 3 nodes   <-- [중요] 반드시 3개가 보여야 성공!
 ```
 $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
-  curl -s http://localhost:10300/management/v1/cluster/state
+  perl -e 'use IO::Socket::INET; $s = IO::Socket::INET->new(PeerAddr => "127.0.0.1", PeerPort => 10300, Proto => "tcp", Timeout => 5) or die "Error: $!"; print $s "GET /management/v1/cluster/state HTTP/1.0\r\nHost: localhost\r\n\r\n"; while(<$s>){ $b .= $_; } print ((split(/\r\n\r\n/, $b, 2))[1]);'
 ```
-> { <br/>
->   "clusterTag": { ... }, <br/>
->   "igniteVersion": "3.1.0", <br/>
->   "name": "my-cluster", <br/>
->   "state": "ACTIVE"      <-- 여기가 핵심 <br/>
-> }
+> {"cmgNodes":["ignite-node-1","ignite-node-0","ignite-node-2"],"msNodes":["ignite-node-1","ignite-node-0","ignite-node-2"],"igniteVersion":"3.1.0","clusterTag":{"clusterName":"ignite-0122-cluster","clusterId":"27a63dbc-549f-4a57-bfed-44dc9af96d15"}}
 ```
-$ oc logs ignite-node-0 -n kscada-mw-ignite | grep "Topology"
-```
-> ... Topology snapshot: [nodes=3] ...
