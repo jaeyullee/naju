@@ -271,7 +271,6 @@ spec:
           volumeMounts:
             - name: ignite-custom-vol
               mountPath: /opt/ignite/custom
-              subPath: ignite-config.conf
             - name: data
               mountPath: /opt/ignite/work
       volumes:
