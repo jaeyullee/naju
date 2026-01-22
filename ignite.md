@@ -143,7 +143,6 @@ data:
         port: 3344
         listenAddresses: ["0.0.0.0"]
         nodeFinder {
-          # 3개 노드의 주소를 모두 적어줍니다.
           netClusterNodes: [
             "ignite-node-0.ignite-headless:3344",
             "ignite-node-1.ignite-headless:3344",
@@ -151,7 +150,6 @@ data:
           ]
         }
       }
-      # (기존 스토리지 설정 유지)
       storage {
         profiles = [
           { name = "aimem", engine = "aimem" },
