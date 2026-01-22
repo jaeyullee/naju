@@ -219,7 +219,7 @@ spec:
       terminationGracePeriodSeconds: 60
       initContainers:
         - name: init-config
-          image: 'nexus.kscada.kdneri.com:5002/app/ignite:3.1.3'
+          image: 'quay.xxx.xxx.xxx:5000/app/ignite:3.1.0'
           command: ['sh', '-c', 'mkdir -p /opt/ignite/custom && cp /tmp/config-map/* /opt/ignite/custom/']
           volumeMounts:
             - name: ignite-config-source
