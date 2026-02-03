@@ -348,3 +348,77 @@ $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
 ```
 > {"cmgNodes":["ignite-node-1","ignite-node-0","ignite-node-2"],"msNodes":["ignite-node-1","ignite-node-0","ignite-node-2"],"igniteVersion":"3.1.0","clusterTag":{"clusterName":"ignite-0122-cluster","clusterId":"27a63dbc-549f-4a57-bfed-44dc9af96d15"}}
 ```
+  
+  
+  
+  
+  
+# 1. Template 배포
+```
+$ cat ignite-pvs.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ignite-node-pv-1
+  labels:
+    usage: ignite-data-vol
+    cluster-name: kscada-ignite
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef:
+    name: data-ignite-node-0
+    namespace: ignite-test
+  nfs:
+    path: /nfs/ignite/pv1
+    server: 192.168.10.40
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ignite-node-pv-2
+  labels:
+    usage: ignite-data-vol
+    cluster-name: kscada-ignite
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef:
+    name: data-ignite-node-1
+    namespace: ignite-test
+  nfs:
+    path: /nfs/ignite/pv2
+    server: 192.168.10.40
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ignite-node-pv-3
+  labels:
+    usage: ignite-data-vol
+    cluster-name: kscada-ignite
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef:
+    name: data-ignite-node-2
+    namespace: ignite-test
+  nfs:
+    path: /nfs/ignite/pv3
+    server: 192.168.10.40
+```
