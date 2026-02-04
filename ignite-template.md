@@ -1,4 +1,5 @@
 # 1. Template 배포 (PV Dynamic Provisioning)
+> NFS CSI Driver 설치되어있다고 가정  
 ```
 apiVersion: template.openshift.io/v1
 kind: Template
