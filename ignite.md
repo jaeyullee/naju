@@ -314,7 +314,7 @@ $ oc create -f ignite-sts.yaml
 
 # 4. Ignite 클러스터 초기화
 ```
-$ oc exec -it ignite-node-0 -n kscada-main-mw-ignite -- ignite3 cluster init   --url=http://127.0.0.1:10300   --name=kscada-cluster   --metastorage-group=ignite-node-0,ignite-node-1,ignite-node-2
+$ oc exec -it ignite-node-0 -n kscada-main-mw-ignite -- /opt/ignite3cli/bin/ignite3 cluster init   --url=http://127.0.0.1:10300   --name=kscada-cluster   --metastorage-group=ignite-node-0,ignite-node-1,ignite-node-2
 ```
 > 버전에 따라 다를 수 있으므로, ignite3 cluster init --help 를 이용해 flags를 미리 확인해야 합니다.
 > 안될 경우 포트 살아있는지 확인하는 방법
@@ -326,7 +326,7 @@ $ oc exec ignite-node-0 -n ignite-test -- perl -e 'use IO::Socket::INET; $s = IO
 # 5. Ignite 클러스터 상태 점검
 ```
 $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
-  ignite3 cluster status
+  /opt/ignite3cli/bin/ignite3 cluster status
 ```
 > Cluster status: <br/>
 >   Name: my-cluster        <-- 아까 init 할 때 지은 이름 <br/>
@@ -334,7 +334,7 @@ $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
 >   Health: HEALTHY         <-- HEALTHY 여야 함
 ```
 $ oc exec -it ignite-node-0 -n kscada-mw-ignite -- \
-  ignite3 cluster topology logical
+  /opt/ignite3cli/bin/ignite3 cluster topology logical
 ```
 > Logical topology: <br/>
 >   ignite-node-0 (id: ... , address: 10.128.x.x:3344) <br/>
