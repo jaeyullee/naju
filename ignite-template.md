@@ -506,5 +506,5 @@ $ oc create -f ignite-pvs.yaml
 ```
 > OCP 웹콘솔 GUI에서 템플릿으로 ignite 배포
 ```
-$ oc exec -it ignite-node-0 -- ignite3 cluster init  --url=http://127.0.0.1:10300   --name=kscada-ignite   --metastorage-group=ignite-node-0,ignite-node-1,ignite-node-2
+$ oc exec -it ignite-node-0 -- /opt/ignite3cli/bin/ignite3 cluster init  --url=http://127.0.0.1:10300   --name=kscada-ignite   --metastorage-group=ignite-node-0,ignite-node-1,ignite-node-2
 ```
